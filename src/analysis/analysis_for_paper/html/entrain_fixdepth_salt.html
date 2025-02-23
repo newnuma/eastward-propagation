@@ -1,0 +1,161 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>entrain_fixdepth_salt</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2024-11-25"><meta name="DC.source" content="entrain_fixdepth_salt.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput">data = sallsal;
+h=8;
+blon=2:140; blat=20:90; rp=1:13;
+LO=numel(blon); LA=numel(blat); PR=numel(rp); TIM=numel(time);
+<span class="comment">%numel(time);</span>
+spod10=squeeze(sallpod(:,:,1,:));
+
+<span class="comment">%0~10m&#12434;&#36861;&#21152;&#12289;0m=10m&#12392;&#12377;&#12427;</span>
+data_x=permute(data,[3 1 2 4]);
+s_data=permute(data(:,:,1,:),[3 1 2 4]);
+data_x=[s_data;data_x];
+data_x=permute(data_x(:,:,1,:),[2 3 1 4]);
+pres1=[0;pres];
+
+<span class="comment">%&#24179;&#22343;&#27700;&#28201;</span>
+data_x=permute(data_x,[1 2 4 3]);
+data_X=reshape(data_x,[LO*LA*TI h+1]);
+hm_data=cell(LO*LA*TI,1);
+<span class="keyword">for</span> i=1:LO*LA*TI
+    hm_data{i,1}=trapz(pres1,data_x(i,:))/pres(h);
+<span class="keyword">end</span>
+hm_data=cat(1,hm_data{:});
+hm_data=reshape(hm_data,[LO LA TI 1]);
+
+b_data = squeeze(data(:,:,h,:));
+
+entrain_w=NaN(141,91,TIM);
+<span class="keyword">for</span> t = 1:TIM-1
+    <span class="keyword">for</span> lon = blon
+        <span class="keyword">for</span> lat = blat
+            entrain_w(lon,lat,t)= -(hm_data(lon,lat,t)-b_data(lon,lat,t))*(wh.v(lon,lat,t))/pres(h);
+        <span class="keyword">end</span>
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+entrain_w(:,:,276)=NaN;
+sb150.entrain.v = entrain_w;
+sb150.entrain = anomaly(sb150.entrain);
+
+
+clear <span class="string">allsst1</span> <span class="string">allsst2</span> <span class="string">allsst3</span> <span class="string">mm1</span> <span class="string">mm2</span> <span class="string">mm3</span> <span class="string">isd1</span> <span class="string">isd</span> <span class="string">isot</span> <span class="string">isoT2</span> <span class="string">isot1</span> <span class="string">te</span>
+clear <span class="string">allssty1</span> <span class="string">allssty21</span> <span class="string">allssty2</span> <span class="string">allssty3</span> <span class="string">allsstay1</span> <span class="string">allsstay2</span> <span class="string">allsstay31</span> <span class="string">allsstay3</span> <span class="string">allsstay4</span>
+</pre><pre class="codeoutput error">&#38306;&#25968;&#12414;&#12383;&#12399;&#22793;&#25968; 'TI' &#12364;&#35469;&#35672;&#12373;&#12428;&#12414;&#12379;&#12435;&#12290;
+
+&#12456;&#12521;&#12540;: entrain_fixdepth_salt (&#34892; 17)
+data_X=reshape(data_x,[LO*LA*TI h+1]);
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+data = sallsal;
+h=8;
+blon=2:140; blat=20:90; rp=1:13;
+LO=numel(blon); LA=numel(blat); PR=numel(rp); TIM=numel(time);
+%numel(time);
+spod10=squeeze(sallpod(:,:,1,:));
+
+%0~10mを追加、0m=10mとする
+data_x=permute(data,[3 1 2 4]);
+s_data=permute(data(:,:,1,:),[3 1 2 4]);
+data_x=[s_data;data_x];
+data_x=permute(data_x(:,:,1,:),[2 3 1 4]);
+pres1=[0;pres];
+
+%平均水温
+data_x=permute(data_x,[1 2 4 3]); 
+data_X=reshape(data_x,[LO*LA*TI h+1]);
+hm_data=cell(LO*LA*TI,1);
+for i=1:LO*LA*TI
+    hm_data{i,1}=trapz(pres1,data_x(i,:))/pres(h);
+end
+hm_data=cat(1,hm_data{:});
+hm_data=reshape(hm_data,[LO LA TI 1]);
+
+b_data = squeeze(data(:,:,h,:));
+
+entrain_w=NaN(141,91,TIM);
+for t = 1:TIM-1
+    for lon = blon
+        for lat = blat
+            entrain_w(lon,lat,t)= -(hm_data(lon,lat,t)-b_data(lon,lat,t))*(wh.v(lon,lat,t))/pres(h);
+        end
+    end
+end
+
+entrain_w(:,:,276)=NaN;
+sb150.entrain.v = entrain_w; 
+sb150.entrain = anomaly(sb150.entrain);
+
+
+clear allsst1 allsst2 allsst3 mm1 mm2 mm3 isd1 isd isot isoT2 isot1 te
+clear allssty1 allssty21 allssty2 allssty3 allsstay1 allsstay2 allsstay31 allsstay3 allsstay4
+##### SOURCE END #####
+--></body></html>
