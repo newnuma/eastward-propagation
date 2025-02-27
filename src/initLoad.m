@@ -1,1 +1,1 @@
-loadData(base_data\data\base_setting.mat,"slon","slat","time","pres")
+load("base_setting.mat","slon","slat","time","pres");

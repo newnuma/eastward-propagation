@@ -1,0 +1,13 @@
+1.https://pubargo.jamstec.go.jp/argo_product/catalog/moaagpv/catalog.htmlでDelayed modeから MOAA_GPV_OI_2001-202?.tar.gzをダウンロード
+
+2.コマンドプロンプトで下記のコマンドをtarファイルを解凍
+
+　tar -xzf "ダウンロード先" 
+
+　for %f in (*.tar.gz) do tar -xf "%f" 
+
+3.解凍されたファイルを今プロジェクトフォルダに移動
+　RG_20....GBL.nc → original_data/moaa_gpv/potentioalDensity_geopotentialHeight/
+  TS_20....GBL.nc → original_data/moaa_gpv/temperature_salinity
+
+4.直近のデータをNear Real Timeからダウンロードし、3のフォルダに保存
