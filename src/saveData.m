@@ -20,6 +20,10 @@ function saveData(relMatPath, varName, varValue)
     %--------------------------------------------------------------------------
     % 1) この関数があるディレクトリを取得し、そこから relMatPath を絶対パスに変換
     %--------------------------------------------------------------------------
+    if ismac
+        relMatPath = strrep(relMatPath, '\', '/');
+    end
+    
     thisFuncFullPath = mfilename('fullpath');        % customSaveData.m のフルパス
     [thisFuncDir, ~, ~] = fileparts(thisFuncFullPath);
     absMatPath = fullfile(thisFuncDir, relMatPath);  % 絶対パス化

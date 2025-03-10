@@ -22,6 +22,10 @@ function varOut = loadData(relMatPath, varName)
     %    relMatPath と組み合わせて絶対パスを作成する
     %--------------------------------------------------------------------------
     % mfilename('fullpath') でこのファイル自身 (customLoadData.m) のフルパスを取得
+    if ismac
+        relMatPath = strrep(relMatPath, '\', '/');
+    end
+    
     thisFuncFullPath = mfilename('fullpath');
     [thisFuncDir, ~, ~] = fileparts(thisFuncFullPath);
 
