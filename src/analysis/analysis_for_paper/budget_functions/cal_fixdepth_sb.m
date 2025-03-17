@@ -19,7 +19,7 @@ entrain_ = entrain(sallsal, pres_index);
 advection_ = advection(sallsal, pres_index);
 
 %時間変化
-mld_mean_ = depth_mean(sallsal,pres_index);
+mld_mean_ = depth_mean(sallsal,1:str2double(pres_index));
 dsdt = dt(mld_mean_);
 
 

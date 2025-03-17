@@ -17,9 +17,9 @@ if (pres_index == "mld")
     depth = mld.depth;
     max_index=13;  %%%%
 else
-    pres_index = int16(pres_index);
-    depth = repmat(pres(pres_index),numel(slon),numel(slat),numel(time));
-    max_index=pres_index; 
+    pres_index_ = str2double(pres_index);
+    depth = repmat(pres(pres_index_),numel(slon),numel(slat),numel(time));
+    max_index=pres_index_; 
 end
 
 rho=1025; %密度(kg/m^3)　
@@ -98,8 +98,8 @@ if (pres_index == "mld")
     Dtx_mean = mld_mean(Dtx);
     Dty_mean = mld_mean(Dty);
 else
-    Dtx_mean = D_mean(Dtx,1:pres_index);
-    Dty_mean = mld_mean(Dty,1:pres_index);
+    Dtx_mean = depth_mean(Dtx,1:pres_index_);
+    Dty_mean = depth_mean(Dty,1:pres_index_);
 end
 
 advection_.x.v = Dtx_mean;

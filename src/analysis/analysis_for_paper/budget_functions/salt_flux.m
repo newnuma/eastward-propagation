@@ -8,9 +8,12 @@ function flux = salt_flux(pres_index)
 addpath ..\..\base_data\data
 addpath ..\..\..\loadData.m
 addpath ..\..\..\..\src\
+addpath ..\..\..\base_data\data
+load("base_setting.mat","pres");
 sallsal = loadData("base_data\data\sallsal.mat","sallsal");
 evp_pre = loadData("analysis\data\evp_pre.mat","evp_pre");
 mld = loadData("analysis\data\mld.mat","mld");
+
 
 rho=1000; dt=60*60*24*31;
 salt = squeeze(sallsal(:,:,1,:));
@@ -18,7 +21,7 @@ salt = squeeze(sallsal(:,:,1,:));
 if pres_index == "mld"
     flux.v = ((evp_pre.evp.v - evp_pre.pre.v).*salt)./(rho.*mld.depth)*dt;
 else
-    flux.v = ((evp_pre.evp.v - evp_pre.pre.v).*salt)./(rho.*pres(pres_index))*dt;
+    flux.v = ((evp_pre.evp.v - evp_pre.pre.v).*salt)./(rho.*pres(str2double(pres_index)))*dt;
 end
 flux = anomaly(flux);
 

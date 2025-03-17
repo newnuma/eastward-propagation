@@ -122,7 +122,7 @@ if (pres_index == "mld")
 
 
 else
-        h = pres_index;
+        h = str2double(pres_index);
     
         LO=numel(slon); LA=numel(slat); PR=numel(1:h); TIM=numel(time);
         %0~10mを追加、0m=10mとする

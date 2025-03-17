@@ -1,4 +1,4 @@
-function data = depth_mean(alldata, pres_range)
+function mean_data = depth_mean(alldata, pres_range)
 addpath ..\..\base_data\data
 load("base_setting.mat","slon","slat","time","year","pres");
 LO=numel(slon); LA=numel(slat); TI=numel(time); YE=numel(year);%
@@ -12,9 +12,9 @@ LO=numel(slon); LA=numel(slat); TI=numel(time); YE=numel(year);%
 
 pres1=pres(pres_range);
 
-all15=alldata(:,:,d1:d2,:); %%4次元データ
+all15=alldata(:,:,pres_range,:); %%4次元データ
 all15=permute(all15,[1 2 4 3]); 
-all15=reshape(all15,[LO*LA*TI (d2-d1+1)]);  %lon*lat*time=10713600
+all15=reshape(all15,[LO*LA*TI (numel(pres_range))]);  %lon*lat*time=10713600
 
 hc=cell(LO*LA*TI,1);
 for i=1:LO*LA*TI
@@ -23,7 +23,5 @@ end
 allhc1=cat(1,hc{:});
 
 allhc2=reshape(allhc1,[LO LA TI 1]);
-data.v = squeeze(allhc2);  %%深さ平均
-data = anomaly(data.d10_150);
+mean_data = squeeze(allhc2);  %%深さ平均
 
-clear all15 allhc1 allhc2 d1 d2 D1 D2

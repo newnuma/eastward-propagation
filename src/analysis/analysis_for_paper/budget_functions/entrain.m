@@ -34,7 +34,7 @@ if (pres_index == "mld")
 
     buttom_data=(buttom_now+buttom_next)/2;
 else
-    pres_index = int16(pres_index);
+    pres_index = str2double(pres_index);
     depth = repmat(pres(pres_index),numel(slon),numel(slat),numel(time));
     mean_data = depth_mean(alldata,1:pres_index);
     buttom_data = squeeze(alldata(:,:,pres_index,:)); 
