@@ -5,10 +5,8 @@ function save_data = dt(data)
 %   Output:
 %      save_data   : 格納先の構造体　（例：mlsb.dt）
 
-addpath ..\..\..\base_data\data
-load("base_setting.mat","slon","slat","time");
-addpath ..\..\..\..\ronbun\
-mlsb = loadData("analysis\data\mlsb.mat","mlsb");
+[slon,slat,time] = evalin("base",'deal(slon, slat, time)');
+mlsb = loadData("analysis_data\mlsb.mat","mlsb");
 addpath ..\basic_functions\
 
 LO=numel(slon); LA=numel(slat);TIM=numel(time);

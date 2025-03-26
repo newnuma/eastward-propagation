@@ -1,6 +1,6 @@
 function mean_data = depth_mean(alldata, pres_range)
-addpath ..\..\base_data\data
-load("base_setting.mat","slon","slat","time","year","pres");
+
+[slon,slat,time,year,pres] = evalin("base",'deal(slon, slat, time, year, pres)');
 LO=numel(slon); LA=numel(slat); TI=numel(time); YE=numel(year);%
 % 深さD1～D2の平均(水温、塩分、密度…)
 %   Inputs:

@@ -1,10 +1,10 @@
-addpath ..\..\base_data\data
-addpath ..\..\..\..\src\
-addpath ..\budget_functions\
-addpath ..\basic_functions\
-sallsal = loadData("base_data\data\sallsal.mat","sallsal");
-evp_pre = loadData("analysis\data\evp_pre.mat","evp_pre");
-mld = loadData("analysis\data\mld.mat","mld");
+% addpath ..\..\base_data\data
+% addpath ..\..\..\..\src\
+% addpath ..\budget_functions\
+% addpath ..\basic_functions\
+sallsal = loadData("base_data\sallsal.mat","sallsal");
+evp_pre = loadData("analysis_data\evp_pre.mat","evp_pre");
+mld = loadData("analysis_data\mld.mat","mld");
 
 % 蒸発-降水
 flux_ = salt_flux("mld");

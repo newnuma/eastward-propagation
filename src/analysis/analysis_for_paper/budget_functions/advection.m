@@ -5,10 +5,7 @@ function advection_ = advection(alldata, pres_index)
 %       pres_index: 収支を計算する深さ(number 例:8→0~150m)。混合層深度の場合は"mld"
 %   Output:
 
-addpath ..\..\..\base_data\data
-addpath ..\..\..\..\src\
-addpath basic_functions\
-load("base_setting.mat","slon","slat","time", "pres");
+[slon,slat,time,pres] = evalin("base",'deal(slon, slat, time, pres)');
 mld = loadData("analysis\data\mld.mat","mld");
 wind_moment = loadData("base_data\data\wind_moment.mat","wind_moment");
 gv = loadData("base_data\data\gv.mat","gv");

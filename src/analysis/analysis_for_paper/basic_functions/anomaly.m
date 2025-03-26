@@ -3,8 +3,7 @@
 
 function data = anomaly(data)
 
-addpath ..\..\..\base_data\data
-load("base_setting.mat","slon","slat","time","year");
+[slon,slat,time,year] = evalin("base",'deal(slon, slat, time, year)');
 LO=numel(slon); LA=numel(slat); TI=numel(time); YE=numel(year);%
 
 % 引数xをmydata.vに変更

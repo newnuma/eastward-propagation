@@ -3,9 +3,7 @@ function [mld_mean_, mld_buttom_]= mld_mean(alldata)
 %   Inputs:
 %       alldata  :　4次元データ（例：salltemp）
 
-addpath ..\..\..\base_data\data
-load("base_setting.mat","slon","slat","time", "pres");
-addpath ..\..\..\..\src\
+[slon,slat,time, pres] = evalin("base",'deal(slon, slat, time, pres)');
 sallpod = loadData("base_data\data\sallpod.mat","sallpod");
 mld = loadData("analysis\data\mld.mat","mld");
 

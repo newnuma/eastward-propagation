@@ -1,5 +1,6 @@
 % addpath ..\..\base_data\data
 % load("base_setting.mat","slon","slat","time","year");
+[slon,slat,time,year,pres] = evalin("base",'deal(slon, slat, time, year, pres)');
 LO=numel(slon); LA=numel(slat); TI=numel(time); YE=numel(year); PR=numel(pres(1:13));%
 
 focus_pods = [25 25.5 26 26.3 26.5 26.7]; %まとめて実行

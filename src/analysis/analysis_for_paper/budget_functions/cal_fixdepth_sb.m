@@ -23,7 +23,7 @@ mld_mean_ = depth_mean(sallsal,1:str2double(pres_index));
 dsdt = dt(mld_mean_);
 
 
-sb150.(fieldName).flux = flux_;
+sb150.flux = flux_;
 sb150.entrain = entrain_;
 sb150.adx = advection_.x;
 sb150.adx = advection_.y;

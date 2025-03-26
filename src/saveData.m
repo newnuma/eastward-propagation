@@ -24,9 +24,8 @@ function saveData(relMatPath, varName, varValue)
         relMatPath = strrep(relMatPath, '\', '/');
     end
     
-    thisFuncFullPath = mfilename('fullpath');        % customSaveData.m のフルパス
-    [thisFuncDir, ~, ~] = fileparts(thisFuncFullPath);
-    absMatPath = fullfile(thisFuncDir, relMatPath);  % 絶対パス化
+    data_folder = evalin('base','data_folder');
+    absMatPath = fullfile(data_folder, relMatPath);
 
     %--------------------------------------------------------------------------
     % 2) 保存先ディレクトリが存在しない場合は作成 (任意)

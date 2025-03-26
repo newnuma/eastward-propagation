@@ -5,11 +5,7 @@ function flux = salt_flux(pres_index)
 %  
 %   mlab.flux = salt_flux("mld")
 
-addpath ..\..\base_data\data
-addpath ..\..\..\loadData.m
-addpath ..\..\..\..\src\
-addpath ..\..\..\base_data\data
-load("base_setting.mat","pres");
+pres = evalin("base","pres");
 sallsal = loadData("base_data\data\sallsal.mat","sallsal");
 evp_pre = loadData("analysis\data\evp_pre.mat","evp_pre");
 mld = loadData("analysis\data\mld.mat","mld");
