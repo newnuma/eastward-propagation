@@ -1,1 +1,4 @@
-load("base_setting.mat","slon","slat","time","pres");
+data_folder = 'C:\Users\ninum\Desktop\east_data\north_pacific';
+base_setting_path = fullfile(data_folder, "\base_data\base_setting.mat");
+
+load(base_setting_path,"slon","slat","time","pres","year");

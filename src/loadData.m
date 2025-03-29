@@ -26,10 +26,8 @@ function varOut = loadData(relMatPath, varName)
         relMatPath = strrep(relMatPath, '\', '/');
     end
     
-    thisFuncFullPath = mfilename('fullpath');
-    [thisFuncDir, ~, ~] = fileparts(thisFuncFullPath);
-
-    absMatPath = fullfile(thisFuncDir, relMatPath);
+    data_folder = evalin('base','data_folder');
+    absMatPath = fullfile(data_folder, relMatPath);
 
     varExists = evalin('base', sprintf('exist(''%s'', ''var'')', varName));
     if varExists
