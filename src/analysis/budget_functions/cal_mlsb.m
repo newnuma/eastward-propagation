@@ -25,3 +25,5 @@ mlsb.entrain = entrain_;
 mlsb.adx = advection_.x;
 mlsb.adx = advection_.y;
 mlsb.dt = dsdt;
+
+saveData("analysis_data\mlsb.mat", "mlsb", mlsb)
