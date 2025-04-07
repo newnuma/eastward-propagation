@@ -28,3 +28,5 @@ sb150.entrain = entrain_;
 sb150.adx = advection_.x;
 sb150.adx = advection_.y;
 sb150.dt = dsdt;
+
+saveData("analysis_data\sb150.mat", "sb150", sb150)
