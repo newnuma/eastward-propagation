@@ -5,9 +5,9 @@ addpath ..\basic_functions\
 
 pres_index = "8";
 
-sallsal = loadData("base_data\data\sallsal.mat","sallsal");
-evp_pre = loadData("analysis\data\evp_pre.mat","evp_pre");
-mld = loadData("analysis\data\mld.mat","mld");
+sallsal = loadData("base_data\sallsal.mat","sallsal");
+evp_pre = loadData("analysis_data\evp_pre.mat","evp_pre");
+mld = loadData("analysis_data\mld.mat","mld");
 
 % 蒸発-降水
 flux_ = salt_flux(pres_index);
