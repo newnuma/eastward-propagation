@@ -3,7 +3,10 @@ addpath ..\..\..\..\src\
 addpath ..\budget_functions\
 addpath ..\basic_functions\
 
-pres_index = "8";
+%深さの設定
+%1  2  3  4  5  6   7   8   9   10  11  12  13  14
+%10,20,30,50,75,100,125,150,200,250,300,400,500,600m,...
+pres_index = "8"; 
 
 sallsal = loadData("base_data\sallsal.mat","sallsal");
 evp_pre = loadData("analysis_data\evp_pre.mat","evp_pre");
