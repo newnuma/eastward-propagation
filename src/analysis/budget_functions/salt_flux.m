@@ -6,9 +6,9 @@ function flux = salt_flux(pres_index)
 %   mlab.flux = salt_flux("mld")
 
 pres = evalin("base","pres");
-sallsal = loadData("base_data\data\sallsal.mat","sallsal");
-evp_pre = loadData("analysis\data\evp_pre.mat","evp_pre");
-mld = loadData("analysis\data\mld.mat","mld");
+sallsal = loadData("base_data\sallsal.mat","sallsal");
+evp_pre = loadData("analysis\evp_pre.mat","evp_pre");
+mld = loadData("analysis\mld.mat","mld");
 
 
 rho=1000; dt=60*60*24*31;
