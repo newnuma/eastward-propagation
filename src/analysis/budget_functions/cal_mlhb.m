@@ -15,10 +15,10 @@ mld_mean_ = mld_mean(salltemp);
 dtdt = dt(mld_mean_);
 
 
-mltb.flux = flux_;
-mltb.entrain = entrain_;
-mltb.adx = advection_.x;
-mltb.adx = advection_.y;
-mltb.dt = dtdt;
+mlhb.flux = flux_;
+mlhb.entrain = entrain_;
+mlhb.adx = advection_.x;
+mlhb.adx = advection_.y;
+mlhb.dt = dtdt;
 
-saveData("analysis_data\mltb.mat", "mltb", mltb)
+saveData("analysis_data\mlhb.mat", "mlhb", mlhb)
