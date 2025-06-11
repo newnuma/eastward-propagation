@@ -8,7 +8,8 @@ mld = loadData("analysis\mld.mat","mld");
 
 
 if pres_index == "mld"
-    flux.v = -ssf./(mld.depth*rho*cp)*dt;
+    depth = mld.depth;
+    flux.v = -ssf./(depth*rho*cp)*dt;
 else
     flux.v = -ssf./(pres(str2double(pres_index))*rho*cp)*dt;
 end
