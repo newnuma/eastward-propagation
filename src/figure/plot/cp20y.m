@@ -1,12 +1,12 @@
 %20年分の平面図
-addpath 'C:\Program Files\MATLAB\R2022a\toolbox\m_map';
+addpath 'C:\Program Files\MATLAB\R2025b\toolbox\m_map';
 row = 4; % plot行数
 col = 6; % plot列数
 
 %%変更部分%%
 % X=(entrainy-entrain_why)*12; %%対象データ(141×91×20)
-X=isoT26ay;
-value_range=[-0.5 0.5]; %%データ値範囲
+X=Temp.d10_300.ay;
+value_range=[-1.5 1.5]; %%データ値範囲
 savename='海面熱フラックス年間偏差.png'; %%図の保存名
 contor_value=[0 0];   %%コンターを引く値
 lon_range=[120 260];  %%表示経度範囲

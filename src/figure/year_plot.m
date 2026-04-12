@@ -1,21 +1,22 @@
-addpath 'C:\Program Files\MATLAB\R2022a\toolbox\m_map';
+addpath 'C:\Program Files\MATLAB\R2025b\toolbox\m_map';
 
-data = wh.d150.ay;  %表示データ
-data_axis = [-5 5]; %表示データの値の範囲
+data = Temp.iso260.ady;  %表示データ
+data_axis = [-1.5, 1.5]; %表示データの値の範囲
 % data = mlsb.dt.ay ;  %表示データ
 % data_axis = [-0.05 0.05]; %表示データの値の範囲
 savename = "year.png";
 plot_color = 'diverging'; % plotの色 'jet'
+% plot_color = 'jet'; % plotの色 'jet'
 
-display_lon = [140 250];
-display_lat = [0 60];
+display_lon = [120 260];
+display_lat = [-10 70];
 
 % フィギュアの初期設定
 figure;
-set(gcf, 'Position', [0, 0, 1300, 600]);  % 位置とサイズを指定
+set(gcf, 'Position', [0, 0, 1200, 650]);  % 位置とサイズを指定
 
-row = 4;  % サブプロットの行数
-col = 6;  % サブプロットの列数
+row = 5;  % サブプロットの行数
+col = 5;  % サブプロットの列
 
 % サブプロット間の余白を設定
 left_margin = 0.05;
@@ -37,7 +38,7 @@ LT=LT';
 for i = 1:row
     for j = 1:col
             
-        if (j+(i-1)*col) <= numel(year)
+        if (j+(i-1)*col) <= 25
             % サブプロットの位置計算   
             left = left_margin + (j - 1) * (plot_width + inter_col_space);
             bottom = 1 - top_margin - i * plot_height - (i - 1) * inter_row_space;
@@ -50,13 +51,13 @@ for i = 1:row
             colormap(m_colmap(plot_color,256));
 
             %title
-            title([num2str(j+col*(i-1)+2000)],'FontSize',13);
+            title([num2str(j+col*(i-1) +2000)],'FontSize',13);
 
             
             %HW領域を囲む線
-%             bndry_lon=[210 230 230 210 210];
-%             bndry_lat=[40 40 50 50 40];
-%             m_line(bndry_lon,bndry_lat,'color','y','linewi',1');
+            bndry_lon=[210 230 230 210 210];
+            bndry_lat=[40 40 50 50 40];
+            m_line(bndry_lon,bndry_lat,'color','y','linewi',1');
 
 
             %TickLabel
@@ -75,9 +76,9 @@ for i = 1:row
             end
 
            
-            %colorbar
+            % colorbar
             if (j+(i-1)*col)==12
-             colorbar('Position', [left + plot_width + 0.015, bottom-plot_height*1.5, 0.014, plot_height*3]);
+             % colorbar('Position', [left + plot_width + 0.015, bottom-plot_height*1.5, 0.014, plot_height*3]);
             end
 
         end
@@ -87,7 +88,7 @@ for i = 1:row
     end
 end
 
-saveas(gcf,fullfile("results",savename));
+saveas(gcf,fullfile("result",savename));
 
 
  

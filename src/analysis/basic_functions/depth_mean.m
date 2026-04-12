@@ -13,12 +13,15 @@ LO=numel(slon); LA=numel(slat); TI=numel(time); YE=numel(year);%
 pres1=pres(pres_range);
 
 all15=alldata(:,:,pres_range,:); %%4次元データ
+pres1 = double(pres1);
+  all15 = double(all15);
 all15=permute(all15,[1 2 4 3]); 
 all15=reshape(all15,[LO*LA*TI (numel(pres_range))]);  %lon*lat*time=10713600
 
 hc=cell(LO*LA*TI,1);
+den = abs(pres1(end) - pres1(1));
 for i=1:LO*LA*TI
-    hc{i,1}=trapz(pres1,all15(i,:))/(pres1(1)-pres1(end));
+  hc{i,1} = trapz(pres1, all15(i,:)) / den;
 end
 allhc1=cat(1,hc{:});
 

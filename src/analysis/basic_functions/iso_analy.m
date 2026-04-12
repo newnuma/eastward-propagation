@@ -1,9 +1,9 @@
 % addpath ..\..\base_data\data
 % load("base_setting.mat","slon","slat","time","year");
 [slon,slat,time,year,pres] = evalin("base",'deal(slon, slat, time, year, pres)');
-LO=numel(slon); LA=numel(slat); TI=numel(time); YE=numel(year); PR=numel(pres(1:13));%
+LO=numel(slon); LA=numel(slat); TI=numel(time); YE=numel(year); PR=numel(pres(1:28));%
 
-focus_pods = [25 25.5 26 26.3 26.5 26.7]; %まとめて実行
+focus_pods = [24.5 25 25.5 26]; %まとめて実行
 % focus_pods = [26];
 for index = 1:length(focus_pods)
 
@@ -11,14 +11,14 @@ for index = 1:length(focus_pods)
     %等密度面解析
     isd=sallpod;
     isot=salltemp;
-    isov_n=gv.n;
-    isov_e=gv.e;
+    % isov_n=gv.n;
+    % isov_e=gv.e;
     % isosal=sallsal;
 
     isd1=zeros(LO,LA,PR,TI);
     isot1=zeros(LO,LA,PR,TI);
-    isov_n1=zeros(LO,LA,PR,TI);
-    isov_e1=zeros(LO,LA,PR,TI);
+    % isov_n1=zeros(LO,LA,PR,TI);
+    % isov_e1=zeros(LO,LA,PR,TI);
     % isosal1=zeros(141,91,25,264);
 
     for n=1:TI
@@ -28,22 +28,22 @@ for index = 1:length(focus_pods)
                     if isd(i,j,k+1,n)<=DS
                         isd(i,j,k,n)=NaN;
                         isot(i,j,k,n)=NaN;
-                        isov_n(i,j,k,n)=NaN;
-                        isov_e(i,j,k,n)=NaN;
+                        % isov_n(i,j,k,n)=NaN;
+                        % isov_e(i,j,k,n)=NaN;
                         %                    isosal(i,j,k,n)=NaN;
                     end
                     if isd(i,j,k-1,n)>=DS
                         isd(i,j,k,n)=NaN;
                         isot(i,j,k,n)=NaN;
-                        isov_n(i,j,k,n)=NaN;
-                        isov_e(i,j,k,n)=NaN;
+                        % isov_n(i,j,k,n)=NaN;
+                        % isov_e(i,j,k,n)=NaN;
                         %                     isosal(i,j,k,n)=NaN;
                     end
                     %線形補間
                     isd1(i,j,k,n)=(DS-isd(i,j,k-1,n))*(pres(k,1)-pres(k-1,1))/(isd(i,j,k,n)-isd(i,j,k-1,n))+pres(k-1);
                     isot1(i,j,k,n)=(DS-isd(i,j,k-1,n))*(isot(i,j,k,n)-isot(i,j,k-1,n))/(isd(i,j,k,n)-isd(i,j,k-1,n))+isot(i,j,k-1,n);
-                    isov_n1(i,j,k,n)=(DS-isd(i,j,k-1,n))*(isov_n(i,j,k,n)-isov_n(i,j,k-1,n))/(isd(i,j,k,n)-isd(i,j,k-1,n))+isov_n(i,j,k-1,n);
-                    isov_e1(i,j,k,n)=(DS-isd(i,j,k-1,n))*(isov_e(i,j,k,n)-isov_e(i,j,k-1,n))/(isd(i,j,k,n)-isd(i,j,k-1,n))+isov_e(i,j,k-1,n);
+                    % isov_n1(i,j,k,n)=(DS-isd(i,j,k-1,n))*(isov_n(i,j,k,n)-isov_n(i,j,k-1,n))/(isd(i,j,k,n)-isd(i,j,k-1,n))+isov_n(i,j,k-1,n);
+                    % isov_e1(i,j,k,n)=(DS-isd(i,j,k-1,n))*(isov_e(i,j,k,n)-isov_e(i,j,k-1,n))/(isd(i,j,k,n)-isd(i,j,k-1,n))+isov_e(i,j,k-1,n);
                     %isosal1(i,j,k,n)=(DS-isd(i,j,k-1,n))*(isosal(i,j,k,n)-isosal(i,j,k-1,n))/(isd(i,j,k,n)-isd(i,j,k-1,n))+isosal(i,j,k-1,n);
                 end
 
@@ -58,8 +58,8 @@ for index = 1:length(focus_pods)
                     if isd1(i,j,k,n)==0
                         isd1(i,j,k,n)=NaN;
                         isot1(i,j,k,n)=NaN;
-                        isov_n1(i,j,k,n)=NaN;
-                        isov_e1(i,j,k,n)=NaN;
+                        % isov_n1(i,j,k,n)=NaN;
+                        % isov_e1(i,j,k,n)=NaN;
                         %                    isosal1(i,j,k,n)=NaN;
                     end
                 end
@@ -73,29 +73,32 @@ for index = 1:length(focus_pods)
     isoT2=max(isot1,[],3,'omitnan');
     isoT=squeeze(isoT2); %%等密度面上水温
 
-    isoV_n2=max(isov_n1,[],3,'omitnan');
-    isoV_n=squeeze(isoV_n2); %%等密度面上水温
+    % isoV_n2=max(isov_n1,[],3,'omitnan');
+    % isoV_n=squeeze(isoV_n2); %%等密度面上水温
+    % 
+    % isoV_e2=max(isov_e1,[],3,'omitnan');
+    % isoV_e=squeeze(isoV_e2); %%等密度面上水温
 
-    isoV_e2=max(isov_e1,[],3,'omitnan');
-    isoV_e=squeeze(isoV_e2); %%等密度面上水温
-
+    DS = DS;
     fieldName = "iso"+ num2str(DS*10);
 
     Temp = evalin('base', 'Temp');
     Temp.(fieldName).v = isoT;
     Temp.(fieldName) = anomaly(Temp.(fieldName));
+    Temp.(fieldName) = anomaly_detrend(Temp.(fieldName));
 
-    Depth = evalin('base', 'Depth');
-    Depth.(fieldName).v = isoD;
-    Depth.(fieldName) = anomaly(Depth.(fieldName));
+    % Depth = evalin('base', 'Depth');
+    % Depth.(fieldName).v = isoD;
+    % Depth.(fieldName) = anomaly(Depth.(fieldName));
+    % Depth.(fieldName) = anomaly_detrend(Depth.(fieldName));
 
-    Gv_n = evalin('base', 'Gv_n');
-    Gv_n.(fieldName).v = isoV_n;
-    Gv_n.(fieldName) = anomaly(Gv_n.(fieldName));
-
-    Gv_e = evalin('base', 'Gv_e');
-    Gv_e.(fieldName).v = isoV_e;
-    Gv_e.(fieldName) = anomaly(Gv_e.(fieldName));
+    % Gv_n = evalin('base', 'Gv_n');
+    % Gv_n.(fieldName).v = isoV_n;
+    % Gv_n.(fieldName) = anomaly(Gv_n.(fieldName));
+    % 
+    % Gv_e = evalin('base', 'Gv_e');
+    % Gv_e.(fieldName).v = isoV_e;
+    % Gv_e.(fieldName) = anomaly(Gv_e.(fieldName));
 
 
     clear isd isd1 isd2 isot isot1 isoT2 isosal isosal1 isosal2

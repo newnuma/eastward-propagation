@@ -4,9 +4,9 @@ savename = "f3_hofud.png";
 
 xmin=150; xmax=237;
 
-data = {Temp.d10.a, Temp.d10_300.a, Salt.d10_300.a ,Density.d10_300.a};
-data_axis = {[-3 3], [-1.5 1.5], [-0.2 0.200001], [-0.2 0.200001] };
-data_title = {'(a)', '(b)', '(c)', '(d)'};
+data = {Temp.iso250.ad, Temp.iso255.ad, Temp.iso260.ad};
+data_axis = {[-1 1], [-1 1], [-1 1] };
+data_title = {'25.0', '25.6', '26.0'};
 
 
 LG=repelem(slon,1,numel(time));
@@ -22,7 +22,7 @@ l=61:70;%40N~50N
 
 LO=numel(slon); LA=numel(slat); TIM=numel(time); YE=numel(year);%
 
-for h=1:4
+for h=1:3
     ax(h) = axes('Position',...
         [(1-left_m)*(mod(h-1,col))/col + left_m ,...
         (1-bot_m)*(1-ceil(h/col)/(row)) + bot_m ,...

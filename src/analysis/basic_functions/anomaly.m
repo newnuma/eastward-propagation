@@ -3,38 +3,41 @@
 
 function data = anomaly(data)
 
-[slon,slat,time,year] = evalin("base",'deal(slon, slat, time, year)');
-LO=numel(slon); LA=numel(slat); TI=numel(time); YE=numel(year);%
+[slon,slat,time] = evalin("base",'deal(slon, slat, time)');
+LO=numel(slon); LA=numel(slat); TI=numel(time);
 
 % 引数xをmydata.vに変更
 x = data.v; % 構造体からデータを取得
-% 気候値、偏差算出
-x1=permute(x,[3 1 2]);    
-x2=reshape(x1,[TI LO*LA]);     
-x3=array2timetable(x2,'RowTimes',time);   
-mm1=groupsummary(x3,'Time','monthofyear','mean');   
-mm2=table2array(mm1(:,3:end));       
-mm3=reshape(mm2,[12 LO LA]);   
-mc=permute(mm3,[2 3 1]);    %月ごと気候値
-mc1=repmat(mc,[1 1 YE]);   %気候値をデータの年数分。データと同じサイズ
+% 気候値、偏差算出（欠測月があっても可）
+x1=permute(x,[3 1 2]);
+x2=reshape(x1,[TI LO*LA]);
+x3=array2timetable(x2,'RowTimes',time);
 
-a=x-mc1; %偏差
-a2=permute(a,[3 1 2]);
-a3=reshape(a2,[TI LO*LA]);     
+mon = month(time);
+mc_flat = NaN(12, LO*LA);
+for im = 1:12
+	idx = (mon == im);
+	if any(idx)
+		mc_flat(im,:) = mean(x2(idx,:), 1, 'omitnan');
+	end
+end
+mc = permute(reshape(mc_flat,[12 LO LA]),[2 3 1]);    %月ごと気候値
 
-% 年間平均
-y1=retime(x3,'yearly','mean');  
-y21=timetable2table(y1);
-y2=table2array(y21(:,2:end));
-y3=reshape(y2,[YE LO LA]);
+mc_time_flat = mc_flat(mon,:);
+a_flat = x2 - mc_time_flat; %偏差
+a = permute(reshape(a_flat,[TI LO LA]),[2 3 1]);
+
+% 年間平均（不完全年でも可）
+y1=retime(x3,'yearly','mean');
+y2=y1.Variables;
+y3=reshape(y2,[size(y2,1) LO LA]);
 y=permute(y3,[2 3 1]);  %%
 
-% 年平均偏差
-ay1=array2timetable(a3,'RowTimes',time); 
+% 年平均偏差（不完全年でも可）
+ay1=array2timetable(a_flat,'RowTimes',time);
 ay2=retime(ay1,'yearly','mean');
-ay31=timetable2table(ay2);
-ay3=table2array(ay31(:,2:end));
-ay4=reshape(ay3,[YE LO LA]);%25年分
+ay3=ay2.Variables;
+ay4=reshape(ay3,[size(ay3,1) LO LA]);
 ay=permute(ay4,[2 3 1]);   %%
 
 % 結果を構造体に格納
@@ -43,6 +46,5 @@ data.mc = mc;
 data.y = y;
 data.ay = ay;
 
-clear x1 x2 x3 mm1 mm2 mm3 
-clear y1 y21 y2 y3 ay1 ay2 ay31 ay3 ay4
+clear x1 x2 x3 y1 y2 y3 ay1 ay2 ay3 ay4
 end

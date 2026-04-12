@@ -1,22 +1,21 @@
-addpath 'C:\Program Files\MATLAB\R2022a\toolbox\m_map';
-
+addpath 'C:\Program Files\MATLAB\R2025b\toolbox\m_map';
 xmin=150; xmax=235;
 
-savename = "f4_hofud_isoTemp_1.png";
-data = {Temp.iso250.a, Temp.iso255.a, Temp.iso260.a,Temp.iso263.a, Temp.iso265.a, Temp.iso267.a };
-data_nan = {Temp.iso250.n, Temp.iso255.n, Temp.iso260.n, Temp.iso263.n, Temp.iso265.n, Temp.iso267.n};
-data_gv = {Gv_e.iso250.v, Gv_e.iso255.v, Gv_e.iso260.v, Gv_e.iso263.v, Gv_e.iso265.v, Gv_e.iso267.v};
-data_axis = {[-1.5 1.5], [-1.5 1.5], [-1.5 1.5], [-1 1], [-0.5 0.5], [-0.3 0.3000001]};
-data_title = {'(a)25.0σ', '(b)25.5σ', '(c)26.0σ','(d)', '(e)', '(f)'};
-gv_plot = {false, false, true};
+% savename = "f4_hofud_isoTemp_1.png";
+% data = {Temp.iso250.a, Temp.iso255.a, Temp.iso260.a,Temp.iso263.a, Temp.iso265.a, Temp.iso267.a };
+% data_nan = {Temp.iso250.n, Temp.iso255.n, Temp.iso260.n, Temp.iso263.n, Temp.iso265.n, Temp.iso267.n};
+% data_gv = {Gv_e.iso250.v, Gv_e.iso255.v, Gv_e.iso260.v, Gv_e.iso263.v, Gv_e.iso265.v, Gv_e.iso267.v};
+% data_axis = {[-1.5 1.5], [-1.5 1.5], [-1.5 1.5], [-1 1], [-0.5 0.5], [-0.3 0.3000001]};
+% data_title = {'(a)25.0σ', '(b)25.5σ', '(c)26.0σ','(d)', '(e)', '(f)'};
+% gv_plot = {false, false, true};
 
 savename = "f4_hofud_isoTemp_2.png";
 data = {Temp.iso263.a, Temp.iso265.a, Temp.iso267.a };
 data_nan = {Temp.iso263.n, Temp.iso265.n, Temp.iso267.n};
-data_gv = {Gv_e.iso263.v, Gv_e.iso265.v, Gv_e.iso267.v};
+% data_gv = {Gv_e.iso263.v, Gv_e.iso265.v, Gv_e.iso267.v};
 data_axis = {[-1 1], [-0.5 0.5], [-0.3 0.3]};
 data_title = {'(d)26.3σ', '(e)26.5σ', '(f)26.7σ'};
-gv_plot = {false, false, true};
+gv_plot = {false, false, false};
 
 
 LO=numel(slon); LA=numel(slat); TIM=numel(time); YE=numel(year);%
@@ -78,7 +77,7 @@ for h=1:row*col
     D=pcolor(LG,TI,HD);
     D.EdgeColor='flat';
     D.EdgeColor='flat';
-    caxis(data_axis{h}); %%
+    clim(data_axis{h}); %%
 
     xticks([150 170 190 210 230])
     xticklabels({'150\circE', '170\circE', '170\circW', '150\circW ','130\circW '})
