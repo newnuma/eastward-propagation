@@ -1,9 +1,9 @@
 function fig04_hovmuller_isopycnal_temp2(cfg)
 %FIG04_HOVMULLER_ISOPYCNAL_TEMP2  Fig.4: Hovmöller of T on deeper isopycnals.
-%   3 panels: 26.3σ, 26.5σ, 26.7σ temperature anomaly.
+%   3 panels: 26.3ρE 26.5ρE 26.7ρEtemperature anomaly.
 
-    grid = io.load_grid(cfg);
-    Temp = io.load_var(cfg, 'Temp');
+    grid = load_grid(cfg);
+    Temp = load_var(cfg, 'Temp');
 
     lat_idx = 61:70;
     fields = {'sig263','sig265','sig267'};
@@ -72,7 +72,7 @@ function fig04_hovmuller_isopycnal_temp2(cfg)
     end
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig04_hovmuller_isopycnal_temp2.png', 'output_dir', outdir);
+    save_fig(fig, 'fig04_hovmuller_isopycnal_temp2.png', 'output_dir', outdir);
 end
 
 

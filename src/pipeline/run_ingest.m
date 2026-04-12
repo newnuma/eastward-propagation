@@ -18,17 +18,17 @@ function cfg = run_ingest(cfg)
     t_start = tic;
 
     % --- MOAA GPV (must run temp/sal first to create grid.mat) ---
-    ingest.read_moaa_temp_sal(cfg);
-    ingest.read_moaa_density(cfg);
+    read_moaa_temp_sal(cfg);
+    read_moaa_density(cfg);
 
     % --- Derived: geostrophic velocity ---
-    ingest.compute_gvel(cfg);
+    compute_gvel(cfg);
 
     % --- NCEP (all require grid.mat from Step 1) ---
-    ingest.read_ncep_flux(cfg);
-    ingest.read_ncep_wind(cfg);
-    ingest.read_ncep_slp(cfg);
-    ingest.read_ncep_evp_pre(cfg);
+    read_ncep_flux(cfg);
+    read_ncep_wind(cfg);
+    read_ncep_slp(cfg);
+    read_ncep_evp_pre(cfg);
 
     elapsed = toc(t_start);
     fprintf('========================================\n');

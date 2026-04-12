@@ -2,7 +2,7 @@ function fig11_vertical_section_lon(cfg)
 %FIG11_VERTICAL_SECTION_LON  Fig.11: Lon–depth cross-sections during MHW.
 %   3 rows (density, temperature, salinity) x 1 col for selected months.
 
-    grid = io.load_grid(cfg);
+    grid = load_grid(cfg);
 
     % Load full-depth fields
     base = fullfile(cfg.paths.data_root, cfg.paths.base_data);
@@ -13,8 +13,8 @@ function fig11_vertical_section_lon(cfg)
     pod_all  = P.pden;
 
     % Anomaly versions
-    Temp = io.load_var(cfg, 'Temp');
-    Salt = io.load_var(cfg, 'Salt');
+    Temp = load_var(cfg, 'Temp');
+    Salt = load_var(cfg, 'Salt');
 
     blat = 61:70;  bp = 1:13;
     pres_lin = (10:10:500)';
@@ -58,7 +58,7 @@ function fig11_vertical_section_lon(cfg)
         fig = figure('Position', [0 0 500 600]);
 
         for h = 1:3
-            [~, axs] = plot.lon_depth_section(data{h}', grid.lon, pres_lin, ...
+            [~, axs] = lon_depth_section(data{h}', grid.lon, pres_lin, ...
                 'clim', clims_list{h}, ...
                 'lon_range', [190 233], 'depth_range', [10 500], ...
                 'titles', titles_list(h), ...
@@ -70,6 +70,6 @@ function fig11_vertical_section_lon(cfg)
 
         outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
         savename = sprintf('fig11_vertical_section_%d.png', s);
-        plot.save_fig(fig, savename, 'output_dir', outdir);
+        save_fig(fig, savename, 'output_dir', outdir);
     end
 end

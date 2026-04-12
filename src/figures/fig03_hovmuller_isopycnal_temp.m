@@ -1,11 +1,11 @@
 function fig03_hovmuller_isopycnal_temp(cfg)
 %FIG03_HOVMULLER_ISOPYCNAL_TEMP  Fig.3: Hovmöller of T on isopycnal surfaces.
-%   3 panels: 25.0σ, 25.5σ, 26.0σ temperature anomaly (detrended).
+%   3 panels: 25.0ρE 25.5ρE 26.0ρEtemperature anomaly (detrended).
 
-    grid = io.load_grid(cfg);
-    Temp = io.load_var(cfg, 'Temp');
+    grid = load_grid(cfg);
+    Temp = load_var(cfg, 'Temp');
 
-    lat_idx = 61:70;  % 40–50°N
+    lat_idx = 61:70;  % 40 E0°N
     fields = {'sig250','sig255','sig260'};
     titles = {'25.0\sigma','25.5\sigma','26.0\sigma'};
     clims  = {[-1 1], [-1 1], [-1 1]};
@@ -20,7 +20,7 @@ function fig03_hovmuller_isopycnal_temp(cfg)
         ax = subplot_custom(fig, 1, 4, h, ...
             'left_m', 0.1, 'bot_m', 0.1, 'ver_r', 1.1, 'col_r', 1.2);
 
-        plot.hovmuller(data2d, grid.lon, grid.time, ...
+        hovmuller(data2d, grid.lon, grid.time, ...
             'clim', clims{h}, ...
             'lon_range', [150 237], ...
             'title_str', titles{h}, ...
@@ -31,7 +31,7 @@ function fig03_hovmuller_isopycnal_temp(cfg)
     end
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig03_hovmuller_isopycnal_temp.png', 'output_dir', outdir);
+    save_fig(fig, 'fig03_hovmuller_isopycnal_temp.png', 'output_dir', outdir);
 end
 
 

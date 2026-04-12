@@ -1,10 +1,10 @@
 function run_figures(cfg)
 %RUN_FIGURES  Generate all paper figures.
 %
-%   pipeline.run_figures(cfg)
+%   run_figures(cfg)
 %
 %   Calls each fig## function in sequence. Each function loads its own
-%   data via io.load_var and saves output to cfg.paths.figures.
+%   data via load_var and saves output to cfg.paths.figures.
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
     if ~isfolder(outdir)

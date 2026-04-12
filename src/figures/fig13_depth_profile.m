@@ -1,7 +1,7 @@
 function fig13_depth_profile(cfg)
 %FIG13_DEPTH_PROFILE  Fig.13: Vertical profiles of T/S/density during MHW.
 
-    grid = io.load_grid(cfg);
+    grid = load_grid(cfg);
 
     base = fullfile(cfg.paths.data_root, cfg.paths.base_data);
     S = load(fullfile(base, 'temp_sal.mat'), 'temp', 'sal');
@@ -32,11 +32,11 @@ function fig13_depth_profile(cfg)
             'label', {[num2str(y+2001),'/',num2str(m)], 'climatology'}, ...
             'style', {'b-', 'k--'});
 
-        [fig, ~] = plot.vertical_profile(profiles, grid.pres(bp), ...
+        [fig, ~] = vertical_profile(profiles, grid.pres(bp), ...
             'title_str', [var_names{f}, ' (', num2str(y+2001), '/', num2str(m), ')'], ...
             'fig_size', [400 600]);
 
         outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-        plot.save_fig(fig, sprintf('fig13_depth_%s.png', var_names{f}), 'output_dir', outdir);
+        save_fig(fig, sprintf('fig13_depth_%s.png', var_names{f}), 'output_dir', outdir);
     end
 end

@@ -1,10 +1,10 @@
 function fig10_correlation_map(cfg)
-%FIG10_CORRELATION_MAP  Fig.10: Lag-correlation between curl and 26σ depth.
+%FIG10_CORRELATION_MAP  Fig.10: Lag-correlation between curl and 26ρEdepth.
 %   2 panels: (a) max |correlation|, (b) lag in months.
 
-    grid = io.load_grid(cfg);
-    Depth = io.load_var(cfg, 'Depth');
-    curl  = io.load_var(cfg, 'curl');
+    grid = load_grid(cfg);
+    Depth = load_var(cfg, 'Depth');
+    curl  = load_var(cfg, 'curl');
 
     nlon = numel(grid.lon);
     nlat = numel(grid.lat);
@@ -28,7 +28,7 @@ function fig10_correlation_map(cfg)
         end
     end
 
-    [fig, ~] = plot.correlation_map(core, lag, grid.lon, grid.lat, ...
+    [fig, ~] = correlation_map(core, lag, grid.lon, grid.lat, ...
         'core_clim', [0 1], 'lag_clim', [-24 24], ...
         'lon_range', [185 240], 'lat_range', [30 60], ...
         'title_core', '(a) correlation', ...
@@ -36,5 +36,5 @@ function fig10_correlation_map(cfg)
         'fig_size', [800 200]);
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig10_correlation_map.png', 'output_dir', outdir);
+    save_fig(fig, 'fig10_correlation_map.png', 'output_dir', outdir);
 end

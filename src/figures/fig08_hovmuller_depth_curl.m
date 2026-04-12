@@ -1,14 +1,14 @@
 function fig08_hovmuller_depth_curl(cfg)
-%FIG08_HOVMULLER_DEPTH_CURL  Fig.8: Hovmöller of 26σ depth + wind stress curl.
+%FIG08_HOVMULLER_DEPTH_CURL  Fig.8: Hovmöller of 26ρEdepth + wind stress curl.
 %   2 panels side by side.
 
-    grid = io.load_grid(cfg);
-    Depth = io.load_var(cfg, 'Depth');
-    curl  = io.load_var(cfg, 'curl');
+    grid = load_grid(cfg);
+    Depth = load_var(cfg, 'Depth');
+    curl  = load_var(cfg, 'curl');
 
     lat_idx = 61:70;
 
-    % 26σ depth anomaly (sign flip: shoaling positive)
+    % 26ρEdepth anomaly (sign flip: shoaling positive)
     depth2d = -squeeze(mean(Depth.sig260.anom(:, lat_idx, :), 2, 'omitnan'));
 
     % 13-month running mean of curl anomaly
@@ -19,7 +19,7 @@ function fig08_hovmuller_depth_curl(cfg)
 
     % Panel 1: depth
     ax1 = subplot_custom(fig, 1, 2, 1);
-    plot.hovmuller(depth2d, grid.lon, grid.time, ...
+    hovmuller(depth2d, grid.lon, grid.time, ...
         'clim', [-20 20], 'lon_range', [150 237], ...
         'title_str', '(a) 26\sigma depth anomaly', ...
         'parent_ax', ax1, 'contour_zero', true, ...
@@ -27,14 +27,14 @@ function fig08_hovmuller_depth_curl(cfg)
 
     % Panel 2: curl
     ax2 = subplot_custom(fig, 1, 2, 2);
-    plot.hovmuller(curl2d, grid.lon, grid.time, ...
+    hovmuller(curl2d, grid.lon, grid.time, ...
         'clim', [-3e-8 3e-8], 'lon_range', [150 237], ...
         'title_str', '(b) wind stress curl anomaly', ...
         'parent_ax', ax2, ...
         'box_lon', [210 230], 'box_time', [grid.time(157) grid.time(181)]);
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig08_hovmuller_depth_curl.png', 'output_dir', outdir);
+    save_fig(fig, 'fig08_hovmuller_depth_curl.png', 'output_dir', outdir);
 end
 
 

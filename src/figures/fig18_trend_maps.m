@@ -1,11 +1,11 @@
 function fig18_trend_maps(cfg)
-%FIG18_TREND_MAPS  Fig.18: Linear trend maps of T, S, density (10–150m).
+%FIG18_TREND_MAPS  Fig.18: Linear trend maps of T, S, density (10 E50m).
 %   3 panels side by side.
 
-    grid = io.load_grid(cfg);
-    Temp    = io.load_var(cfg, 'Temp');
-    Salt    = io.load_var(cfg, 'Salt');
-    Density = io.load_var(cfg, 'Density');
+    grid = load_grid(cfg);
+    Temp    = load_var(cfg, 'Temp');
+    Salt    = load_var(cfg, 'Salt');
+    Density = load_var(cfg, 'Density');
 
     % Compute linear trend per grid point (per decade)
     nlon = numel(grid.lon);
@@ -37,7 +37,7 @@ function fig18_trend_maps(cfg)
 
     for h = 1:3
         ax = subplot(1, 3, h);
-        plot.horizontal_map(panels{h}, grid.lon, grid.lat, ...
+        horizontal_map(panels{h}, grid.lon, grid.lat, ...
             'clim', clims{h}, ...
             'lon_range', [120 260], 'lat_range', [-20 65], ...
             'title_str', titles{h}, ...
@@ -46,5 +46,5 @@ function fig18_trend_maps(cfg)
     end
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig18_trend_maps.png', 'output_dir', outdir);
+    save_fig(fig, 'fig18_trend_maps.png', 'output_dir', outdir);
 end

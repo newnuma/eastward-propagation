@@ -2,8 +2,8 @@ function fig07_hovmuller_temp_3d(cfg)
 %FIG07_HOVMULLER_TEMP_3D  Fig.7: Hovmöller of T at 50m depth.
 %   3 panels: anomaly, detrended, difference (same pattern as fig06).
 
-    grid = io.load_grid(cfg);
-    Temp = io.load_var(cfg, 'Temp');
+    grid = load_grid(cfg);
+    Temp = load_var(cfg, 'Temp');
 
     lat_idx = 61:70;
     clim = [-1.5 1.5];
@@ -19,7 +19,7 @@ function fig07_hovmuller_temp_3d(cfg)
 
     for h = 1:3
         ax = subplot_custom(fig, 1, 4, h);
-        plot.hovmuller(panels{h}, grid.lon, grid.time, ...
+        hovmuller(panels{h}, grid.lon, grid.time, ...
             'clim', clim, ...
             'lon_range', [150 237], ...
             'title_str', titles{h}, ...
@@ -30,7 +30,7 @@ function fig07_hovmuller_temp_3d(cfg)
     end
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig07_hovmuller_temp_50m.png', 'output_dir', outdir);
+    save_fig(fig, 'fig07_hovmuller_temp_50m.png', 'output_dir', outdir);
 end
 
 

@@ -2,9 +2,9 @@ function fig14_horizontal_mlhb(cfg)
 %FIG14_HORIZONTAL_MLHB  Fig.14: Annual anomaly maps of ML heat budget terms.
 %   6 rows x 6 cols: dT/dt, surface flux, entrainment, adv-x, adv-y, SLP.
 
-    grid = io.load_grid(cfg);
-    mlhb = io.load_var(cfg, 'mlhb');
-    slp  = io.load_var(cfg, 'slp');
+    grid = load_grid(cfg);
+    mlhb = load_var(cfg, 'mlhb');
+    slp  = load_var(cfg, 'slp');
 
     start_year = 11;  % 2011
     nyears = 6;
@@ -36,7 +36,7 @@ function fig14_horizontal_mlhb(cfg)
         end
     end
 
-    [fig, ~] = plot.map_grid(panels, grid.lon, grid.lat, ...
+    [fig, ~] = map_grid(panels, grid.lon, grid.lat, ...
         'rows', nrow, 'cols', nyears, ...
         'clim', clims, ...
         'lon_range', [140 250], 'lat_range', [0 60], ...
@@ -45,5 +45,5 @@ function fig14_horizontal_mlhb(cfg)
         'box_lon', [210 230], 'box_lat', [40 50], 'box_color', 'y');
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig14_horizontal_mlhb.png', 'output_dir', outdir);
+    save_fig(fig, 'fig14_horizontal_mlhb.png', 'output_dir', outdir);
 end

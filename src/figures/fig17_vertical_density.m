@@ -1,7 +1,7 @@
 function fig17_vertical_density(cfg)
 %FIG17_VERTICAL_DENSITY  Fig.17: Lon–depth density sections (2x2 months).
 
-    grid = io.load_grid(cfg);
+    grid = load_grid(cfg);
 
     base = fullfile(cfg.paths.data_root, cfg.paths.base_data);
     P = load(fullfile(base, 'density.mat'), 'pden');
@@ -57,5 +57,5 @@ function fig17_vertical_density(cfg)
     end
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig17_vertical_density.png', 'output_dir', outdir);
+    save_fig(fig, 'fig17_vertical_density.png', 'output_dir', outdir);
 end

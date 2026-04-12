@@ -1,9 +1,9 @@
 function fig12_vertical_timesection(cfg)
 %FIG12_VERTICAL_TIMESECTION  Fig.12: Depth–time sections (MHW period).
 %   3 rows: density anomaly, temperature anomaly, salinity anomaly.
-%   Box mean 210–230°E, 40–50°N.
+%   Box mean 210 E30°E, 40 E0°N.
 
-    grid = io.load_grid(cfg);
+    grid = load_grid(cfg);
 
     base = fullfile(cfg.paths.data_root, cfg.paths.base_data);
     S = load(fullfile(base, 'temp_sal.mat'), 'temp', 'sal');
@@ -42,7 +42,7 @@ function fig12_vertical_timesection(cfg)
     M = load(mld_file, 'mld');
     mld_ts = squeeze(mean(M.mld(blon, blat, :), [1 2], 'omitnan'));
 
-    time_range = [grid.time(144) grid.time(193)];  % ~2013–2017
+    time_range = [grid.time(144) grid.time(193)];  % ~2013 E017
 
     data_all  = {pod_alin, temp_lin, sal_lin};
     clim_all  = {[-0.5 0.5], [-2 2], [-0.3 0.3]};
@@ -54,7 +54,7 @@ function fig12_vertical_timesection(cfg)
         ax = axes(fig, 'Position', ...
             [0.12, 1.0 - h*0.3, 0.75, 0.25]);
 
-        plot.vertical_section(data_all{h}, grid.time, pres_lin, ...
+        vertical_section(data_all{h}, grid.time, pres_lin, ...
             'clim', clim_all{h}, ...
             'depth_range', [10 200], ...
             'time_range', time_range, ...
@@ -70,5 +70,5 @@ function fig12_vertical_timesection(cfg)
     end
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig12_vertical_timesection.png', 'output_dir', outdir);
+    save_fig(fig, 'fig12_vertical_timesection.png', 'output_dir', outdir);
 end

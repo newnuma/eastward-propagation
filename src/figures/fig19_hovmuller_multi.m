@@ -2,8 +2,8 @@ function fig19_hovmuller_multi(cfg)
 %FIG19_HOVMULLER_MULTI  Fig.19: Multi-panel Hovmöller of various T fields.
 %   5 cols: T(10m), T(150m), T(10-300m), T(iso260), + blank or extra.
 
-    grid = io.load_grid(cfg);
-    Temp  = io.load_var(cfg, 'Temp');
+    grid = load_grid(cfg);
+    Temp  = load_var(cfg, 'Temp');
 
     lat_idx = 61:70;
 
@@ -18,7 +18,7 @@ function fig19_hovmuller_multi(cfg)
 
         ax = subplot_custom(fig, 1, numel(fields)+1, h);
 
-        plot.hovmuller(data2d, grid.lon, grid.time, ...
+        hovmuller(data2d, grid.lon, grid.time, ...
             'clim', clims{h}, ...
             'lon_range', [150 237], ...
             'title_str', titles{h}, ...
@@ -30,7 +30,7 @@ function fig19_hovmuller_multi(cfg)
     end
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig19_hovmuller_multi.png', 'output_dir', outdir);
+    save_fig(fig, 'fig19_hovmuller_multi.png', 'output_dir', outdir);
 end
 
 

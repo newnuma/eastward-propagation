@@ -1,12 +1,12 @@
 function fig02_horizontal_anomaly(cfg)
 %FIG02_HORIZONTAL_ANOMALY  Fig.2: Annual anomaly maps for T/S/density.
 %   4 rows (10m Temp, 10-300m Temp, 10-300m Salt, 10-300m Density)
-%   x 6 columns (2011–2016).
+%   x 6 columns (2011 E016).
 
-    grid = io.load_grid(cfg);
-    Temp    = io.load_var(cfg, 'Temp');
-    Salt    = io.load_var(cfg, 'Salt');
-    Density = io.load_var(cfg, 'Density');
+    grid = load_grid(cfg);
+    Temp    = load_var(cfg, 'Temp');
+    Salt    = load_var(cfg, 'Salt');
+    Density = load_var(cfg, 'Density');
 
     start_year = 11;  % 2011
     nyears = 6;
@@ -32,7 +32,7 @@ function fig02_horizontal_anomaly(cfg)
         end
     end
 
-    [fig, ~] = plot.map_grid(panels, grid.lon, grid.lat, ...
+    [fig, ~] = map_grid(panels, grid.lon, grid.lat, ...
         'rows', 4, 'cols', nyears, ...
         'clim', clims, ...
         'lon_range', [120 255], 'lat_range', [-20 65], ...
@@ -41,5 +41,5 @@ function fig02_horizontal_anomaly(cfg)
         'box_lon', [140 240], 'box_lat', [40 50], 'box_color', 'y');
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig02_horizontal_anomaly.png', 'output_dir', outdir);
+    save_fig(fig, 'fig02_horizontal_anomaly.png', 'output_dir', outdir);
 end

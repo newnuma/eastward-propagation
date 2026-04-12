@@ -1,13 +1,13 @@
 function fig09_bplot_curl_depth(cfg)
-%FIG09_BPLOT_CURL_DEPTH  Fig.9: Dual-axis time series of curl vs 26σ depth.
-%   Box-averaged (210–230°E, 40–50°N).
+%FIG09_BPLOT_CURL_DEPTH  Fig.9: Dual-axis time series of curl vs 26ρEdepth.
+%   Box-averaged (210 E30°E, 40 E0°N).
 
-    grid = io.load_grid(cfg);
-    Depth = io.load_var(cfg, 'Depth');
-    curl  = io.load_var(cfg, 'curl');
+    grid = load_grid(cfg);
+    Depth = load_var(cfg, 'Depth');
+    curl  = load_var(cfg, 'curl');
 
-    blon = 92:111;  % 210–230°E
-    blat = 61:70;   % 40–50°N
+    blon = 92:111;  % 210 E30°E
+    blat = 61:70;   % 40 E0°N
 
     % 13-month running mean curl anomaly
     curl_ts = squeeze(mean(movmean(curl.anom, 13, 3, 'omitnan'), [1 2], 'omitnan'));
@@ -16,7 +16,7 @@ function fig09_bplot_curl_depth(cfg)
     curl3d = movmean(curl.anom, 13, 3, 'omitnan');
     curl_ts = squeeze(mean(curl3d(blon, blat, :), [1 2], 'omitnan'));
 
-    % 26σ depth anomaly (sign flip)
+    % 26ρEdepth anomaly (sign flip)
     depth_ts = -squeeze(mean(Depth.sig260.anom(blon, blat, :), [1 2], 'omitnan'));
 
     fig = figure('Position', [0 0 1100 300]);
@@ -31,8 +31,8 @@ function fig09_bplot_curl_depth(cfg)
 
     yline(0);
     legend('curl', '26\sigma depth', 'Location', 'southwest');
-    title('210–230°E, 40–50°N');
+    title('210 E30°E, 40 E0°N');
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, 'fig09_bplot_curl_depth.png', 'output_dir', outdir);
+    save_fig(fig, 'fig09_bplot_curl_depth.png', 'output_dir', outdir);
 end

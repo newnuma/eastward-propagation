@@ -1,9 +1,9 @@
 function fig05_hovmuller_isopycnal_depth(cfg)
 %FIG05_HOVMULLER_ISOPYCNAL_DEPTH  Fig.5: Hovmöller of isopycnal depth anomaly.
-%   2 sets of 3 panels: 25.0/25.5/26.0σ and 26.3/26.5/26.7σ depth anomaly.
+%   2 sets of 3 panels: 25.0/25.5/26.0ρEand 26.3/26.5/26.7ρEdepth anomaly.
 
-    grid = io.load_grid(cfg);
-    Depth = io.load_var(cfg, 'Depth');
+    grid = load_grid(cfg);
+    Depth = load_var(cfg, 'Depth');
 
     lat_idx = 61:70;
 
@@ -34,7 +34,7 @@ function make_hovmuller_set(cfg, grid, Depth, lat_idx, fields, titles, clims, sa
         data2d = squeeze(mean(data3d(:, lat_idx, :), 2, 'omitnan'));
 
         ax = subplot_custom(fig, 1, 4, h);
-        plot.hovmuller(data2d, grid.lon, grid.time, ...
+        hovmuller(data2d, grid.lon, grid.time, ...
             'clim', clims{h}, ...
             'lon_range', [150 237], ...
             'title_str', titles{h}, ...
@@ -45,7 +45,7 @@ function make_hovmuller_set(cfg, grid, Depth, lat_idx, fields, titles, clims, sa
     end
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, savename, 'output_dir', outdir);
+    save_fig(fig, savename, 'output_dir', outdir);
 end
 
 

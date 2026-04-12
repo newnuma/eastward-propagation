@@ -3,9 +3,9 @@ function fig06_hovmuller_150m(cfg)
 %   Two figures, each with 3 panels:
 %     (a) monthly anomaly, (b) detrended, (c) difference.
 
-    grid = io.load_grid(cfg);
-    Temp = io.load_var(cfg, 'Temp');
-    Salt = io.load_var(cfg, 'Salt');
+    grid = load_grid(cfg);
+    Temp = load_var(cfg, 'Temp');
+    Salt = load_var(cfg, 'Salt');
 
     lat_idx = 61:70;
 
@@ -36,7 +36,7 @@ function make_3panel(cfg, grid, lat_idx, data_a, data_dt, t1, t2, t3, clim, save
     for h = 1:3
         ax = subplot_custom(fig, 1, 4, h);
 
-        plot.hovmuller(panels{h}, grid.lon, grid.time, ...
+        hovmuller(panels{h}, grid.lon, grid.time, ...
             'clim', clim, ...
             'lon_range', [150 237], ...
             'title_str', titles{h}, ...
@@ -48,7 +48,7 @@ function make_3panel(cfg, grid, lat_idx, data_a, data_dt, t1, t2, t3, clim, save
     end
 
     outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);
-    plot.save_fig(fig, savename, 'output_dir', outdir);
+    save_fig(fig, savename, 'output_dir', outdir);
 end
 
 
