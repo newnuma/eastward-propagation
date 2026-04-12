@@ -1,0 +1,73 @@
+function needs_update = check_updates(cfg)
+%CHECK_UPDATES Check which data sources have new files and need re-ingestion.
+%
+%   needs_update = check_updates(cfg)
+%
+%   Compares the modification timestamps of raw NetCDF files against the
+%   generated .mat files. Returns a struct with logical fields indicating
+%   which data sources need updating.
+%
+%   Fields:
+%     .moaa_ts, .moaa_pd, .ncep_flux, .ncep_wind, .ncep_slp, .ncep_evp
+
+    needs_update = struct();
+
+    needs_update.moaa_ts = source_newer_than_mat(cfg, ...
+        cfg.paths.raw.moaa_ts, '**/*.nc', ...
+        fullfile(cfg.paths.base_data, 'temp.mat'));
+
+    needs_update.moaa_pd = source_newer_than_mat(cfg, ...
+        cfg.paths.raw.moaa_pd, '**/*.nc', ...
+        fullfile(cfg.paths.base_data, 'pden.mat'));
+
+    needs_update.ncep_flux = source_newer_than_mat(cfg, ...
+        cfg.paths.raw.ncep_flux, '*.nc', ...
+        fullfile(cfg.paths.base_data, 'flux.mat'));
+
+    needs_update.ncep_wind = source_newer_than_mat(cfg, ...
+        cfg.paths.raw.ncep_wind, '*.nc', ...
+        fullfile(cfg.paths.base_data, 'wind.mat'));
+
+    needs_update.ncep_slp = source_newer_than_mat(cfg, ...
+        cfg.paths.raw.ncep_slp, '*.nc', ...
+        fullfile(cfg.paths.base_data, 'slp.mat'));
+
+    needs_update.ncep_evp = source_newer_than_mat(cfg, ...
+        cfg.paths.raw.ncep_evp, '*.nc', ...
+        fullfile(cfg.paths.base_data, 'evp_pre.mat'));
+
+    % Print summary
+    fields = fieldnames(needs_update);
+    for i = 1:numel(fields)
+        if needs_update.(fields{i})
+            fprintf('[check] %-12s : UPDATE NEEDED\n', fields{i});
+        else
+            fprintf('[check] %-12s : up to date\n', fields{i});
+        end
+    end
+end
+
+function needs = source_newer_than_mat(cfg, raw_rel, pattern, mat_rel)
+%SOURCE_NEWER_THAN_MAT True if any source file is newer than the MAT file.
+    mat_path = fullfile(cfg.paths.data_root, mat_rel);
+
+    % If output does not exist, update is needed
+    if ~isfile(mat_path)
+        needs = true;
+        return;
+    end
+
+    mat_info = dir(mat_path);
+    mat_time = datetime(mat_info.datenum, 'ConvertFrom', 'datenum');
+
+    raw_dir   = fullfile(cfg.paths.data_root, raw_rel);
+    src_files = dir(fullfile(raw_dir, pattern));
+
+    if isempty(src_files)
+        needs = false;
+        return;
+    end
+
+    src_times = datetime([src_files.datenum], 'ConvertFrom', 'datenum');
+    needs = max(src_times) > mat_time;
+end
