@@ -10,10 +10,7 @@ function read_ncep_wind(cfg)
     fprintf('[ingest] Reading NCEP wind stress\n');
 
     grid    = load_grid(cfg);
-    raw_dir = fullfile(cfg.paths.data_root, cfg.paths.raw.ncep_wind);
-
-    lr = cfg.ncep.wind.lon_range;
-    ar = cfg.ncep.wind.lat_range;
+    raw_dir = fullfile(cfg.paths.data_root, cfg.paths.raw.ncep);
 
     % Read coordinates and time
     ref_file = fullfile(raw_dir, cfg.ncep.wind.files.u);
@@ -21,19 +18,24 @@ function read_ncep_wind(cfg)
     src_lat  = double(ncread(ref_file, 'lat'));
     raw_time = double(ncread(ref_file, 'time'));
 
+    % Determine subset indices (add buffer for interpolation to target grid)
+    buf = 5;  % degrees buffer for regridding margin
+    [lr1, lr2] = find_range_indices(src_lon, cfg.target_lon + [-buf buf]);
+    [ar1, ar2] = find_range_indices(src_lat, cfg.target_lat + [-buf buf]);
+
     % Match time
     ncep_times = datetime(1800, 1, 1) + hours(raw_time);
     time_idx = match_times(ncep_times, grid.time);
 
-    sub_lon = src_lon(lr(1):lr(2));
-    sub_lat = src_lat(ar(1):ar(2));
+    sub_lon = src_lon(lr1:lr2);
+    sub_lat = src_lat(ar1:ar2);
 
     % Read wind stress (negate uflx: NCEP convention → eastward positive)
     uf_raw = ncread(fullfile(raw_dir, cfg.ncep.wind.files.u), 'uflx');
     vf_raw = ncread(fullfile(raw_dir, cfg.ncep.wind.files.v), 'vflx');
 
-    uf = -uf_raw(lr(1):lr(2), ar(1):ar(2), time_idx);   % eastward positive
-    vf =  vf_raw(lr(1):lr(2), ar(1):ar(2), time_idx);
+    uf = -uf_raw(lr1:lr2, ar1:ar2, time_idx);   % eastward positive
+    vf =  vf_raw(lr1:lr2, ar1:ar2, time_idx);
 
     % Ensure ascending latitude for curl computation
     if sub_lat(1) > sub_lat(end)

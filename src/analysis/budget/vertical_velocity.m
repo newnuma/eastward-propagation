@@ -1,7 +1,8 @@
-function wh_out = wh(cfg, grid, mld, depth_mode)
-%WH Compute vertical velocity at the base of a layer.
+function wh_out = vertical_velocity(cfg, grid, mld, depth_mode, cached)
+%VERTICAL_VELOCITY Compute vertical velocity at the base of a layer.
 %
-%   wh_out = wh(cfg, grid, mld, depth_mode)
+%   wh_out = vertical_velocity(cfg, grid, mld, depth_mode)
+%   wh_out = vertical_velocity(cfg, grid, mld, depth_mode, cached)
 %
 %   w|_{-h} = (1/rho0) * curl(tau/f) - (beta/f) * integral_0^{-h} v_G dz
 %
@@ -10,13 +11,19 @@ function wh_out = wh(cfg, grid, mld, depth_mode)
 %       grid       : grid struct
 %       mld        : mld struct (.depth, .index)
 %       depth_mode : "ml" for mixed layer, or pressure level index (integer)
+%       cached     : (optional) struct with pre-loaded .wind, .gvel, .pden
 %
 %   Output:
 %       wh_out.raw : vertical velocity (lon x lat x time) [m/month]
 
-    wind = load_var(cfg, fullfile(cfg.paths.base_data, 'wind.mat'), 'wind');
-    gvel = load_var(cfg, fullfile(cfg.paths.base_data, 'gvel.mat'), 'gvel');
-    pden = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden');
+    if nargin < 5, cached = struct(); end
+
+    if isfield(cached, 'wind'), wind = cached.wind;
+    else, wind = load_var(cfg, fullfile(cfg.paths.base_data, 'wind.mat'), 'wind'); end
+    if isfield(cached, 'gvel'), gvel = cached.gvel;
+    else, gvel = load_var(cfg, fullfile(cfg.paths.base_data, 'gvel.mat'), 'gvel'); end
+    if isfield(cached, 'pden'), pden = cached.pden;
+    else, pden = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden'); end
 
     pres = double(grid.pres);
     lat  = grid.lat;
@@ -27,23 +34,16 @@ function wh_out = wh(cfg, grid, mld, depth_mode)
     rho0  = cfg.const.rho0;
     omega = cfg.const.omega;
     R     = cfg.const.R;
+    dt_s  = reshape(seconds_per_month(grid.time), 1, 1, []);
 
-    f_vec = 2 * omega * sin(lat(:) * deg2rad);
-    beta  = 2 * omega * cos(lat(:) * deg2rad) / R;
+    f_vec = gsw_f(lat(:));
+    beta  = 2 * cfg.const.omega * cos(lat(:) * deg2rad) / R;
 
-    % Expand f, beta to (nlon x nlat x ntime)
     f_3d    = repmat(reshape(f_vec, [1 nlat 1]), [nlon 1 ntime]);
     beta_3d = repmat(reshape(beta,  [1 nlat 1]), [nlon 1 ntime]);
 
-    dt_s = 60 * 60 * 24 * 31;   % seconds per month (approx)
-
-    if ischar(depth_mode) || isstring(depth_mode)
-        use_ml = true;
-        max_k = 13;
-    else
-        use_ml = false;
-        max_k = depth_mode;
-    end
+    dims = [nlon, nlat, ntime];
+    [~, max_k, use_ml] = resolve_depth(depth_mode, mld, pres, dims, cfg.analysis.max_depth);
 
     % --- Depth-integrated v_G from 0 to layer base ---
     if use_ml
@@ -75,7 +75,7 @@ function wh_out = wh(cfg, grid, mld, depth_mode)
     Wh = curl_tf / rho0 - beta_3d .* vg_int ./ f_3d;
 
     % Convert to m/month
-    Wh = Wh * dt_s;
+    Wh = Wh .* dt_s;
 
     % Clean infinities
     Wh(~isfinite(Wh)) = NaN;

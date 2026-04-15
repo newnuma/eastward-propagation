@@ -1,7 +1,7 @@
-function mld = set_mld(cfg)
-%SET_MLD Compute mixed layer depth from potential density.
+function mld = compute_mld(cfg)
+%COMPUTE_MLD Compute mixed layer depth from potential density.
 %
-%   mld = set_mld(cfg)
+%   mld = compute_mld(cfg)
 %
 %   MLD defined as depth where density exceeds 10-m density by threshold.
 %   Uses linear interpolation between vertical levels.
@@ -18,7 +18,8 @@ function mld = set_mld(cfg)
     nlon  = numel(grid.lon);
     nlat  = numel(grid.lat);
     ntime = numel(grid.time);
-    nz = min(13, numel(pres));   % search only upper 13 levels
+    [~, nz] = min(abs(pres - cfg.analysis.max_depth));
+    nz = min(nz, numel(pres));
 
     pden_10m = squeeze(pden(:, :, 1, :));   % density at 10 m
 

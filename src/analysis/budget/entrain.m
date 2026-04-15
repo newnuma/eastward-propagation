@@ -1,7 +1,8 @@
-function result = entrain(cfg, grid, alldata, mld, depth_mode)
+function result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
 %ENTRAIN Compute entrainment term in mixed-layer budget.
 %
 %   result = entrain(cfg, grid, alldata, mld, depth_mode)
+%   result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
 %
 %   -(T_mean - T_b) / h * w_e
 %   where w_e = [h(t+1) - h(t)]/dt + w|_{-h}
@@ -10,20 +11,27 @@ function result = entrain(cfg, grid, alldata, mld, depth_mode)
 %       alldata    : 4D data (lon x lat x depth x time), e.g. temperature
 %       mld        : struct with .depth, .index
 %       depth_mode : "ml" for mixed layer, or pressure level index (integer)
+%       cached     : (optional) struct with pre-loaded .pden, .wind, .gvel
 %
 %   Output:
 %       result.raw : entrainment term (lon x lat x time)
 
-    pden = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden');
+    if nargin < 6, cached = struct(); end
+
+    if isfield(cached, 'pden'), pden = cached.pden;
+    else, pden = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden'); end
+
     pres = double(grid.pres);
     nlon = numel(grid.lon); nlat = numel(grid.lat); ntime = numel(grid.time);
+    dims = [nlon, nlat, ntime];
+
+    [depth, ~, use_ml] = resolve_depth(depth_mode, mld, pres, dims, cfg.analysis.max_depth);
 
     % Vertical velocity at layer base
-    wh_out = wh(cfg, grid, mld, depth_mode);
+    wh_out = vertical_velocity(cfg, grid, mld, depth_mode, cached);
 
-    if ischar(depth_mode) || isstring(depth_mode)
-        depth = mld.depth;
-        [mean_data, bottom_now] = mld_mean(alldata, grid, pden, mld);
+    if use_ml
+        [mean_data, bottom_now] = mld_mean(alldata, grid, pden, mld, cfg.analysis.mld_threshold);
 
         % Bottom value at NEXT month's MLD
         bottom_next = NaN(nlon, nlat, ntime);
@@ -46,10 +54,8 @@ function result = entrain(cfg, grid, alldata, mld, depth_mode)
         end
         bottom_data = (bottom_now + bottom_next) / 2;
     else
-        idx = depth_mode;
-        depth = repmat(pres(idx), nlon, nlat, ntime);
-        mean_data = depth_mean(alldata, pres, 1:idx);
-        bottom_data = squeeze(alldata(:, :, idx, :));
+        mean_data = depth_mean(alldata, pres, 1:depth_mode);
+        bottom_data = squeeze(alldata(:, :, depth_mode, :));
     end
 
     % Entrainment calculation

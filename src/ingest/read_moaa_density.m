@@ -1,74 +1,75 @@
 function read_moaa_density(cfg)
-%READ_MOAA_DENSITY Read MOAA GPV potential density & dynamic height.
+%READ_MOAA_DENSITY Compute potential density & dynamic height from temp/sal.
 %
 %   read_moaa_density(cfg)
 %
-%   Reads all monthly NC files from the density/geopotential height
-%   directory and saves:
-%       base_data/pden.mat    — potential density  (lon x lat x depth x time)
-%       base_data/dheight.mat — dynamic height     (lon x lat x depth x time)
+%   Loads temperature and salinity (saved by read_moaa_temp_sal) and
+%   computes potential density and dynamic height using TEOS-10 (GSW).
+%   Requires the GSW Oceanographic Toolbox on the MATLAB path.
+%
+%   Saves:
+%       base_data/pden.mat    — potential density σ₀ [kg/m³] (lon x lat x depth x time)
+%       base_data/dheight.mat — dynamic height [m²/s²]       (lon x lat x depth x time)
 
-    raw_dir = fullfile(cfg.paths.data_root, cfg.paths.raw.moaa_pd);
-    fprintf('[ingest] Reading MOAA GPV density/DH from %s\n', raw_dir);
+    fprintf('[ingest] Computing potential density / dynamic height (TEOS-10)\n');
 
-    % Load target grid (created by read_moaa_temp_sal)
+    % Verify GSW availability
+    if ~exist('gsw_SA_from_SP', 'file') || ~exist('gsw_CT_from_t', 'file') ...
+            || ~exist('gsw_rho', 'file') || ~exist('gsw_geo_strf_dyn_height', 'file')
+        error('ingest:NoGSW', ...
+            'GSW Oceanographic Toolbox not found. Add it to the MATLAB path.');
+    end
+
+    % Load base data produced by read_moaa_temp_sal
     grid = load_grid(cfg);
+    temp = load_var(cfg, fullfile(cfg.paths.base_data, 'temp.mat'), 'temp');
+    sal  = load_var(cfg, fullfile(cfg.paths.base_data, 'sal.mat'),  'sal');
 
-    % Find all NetCDF files recursively
-    nc_files = dir(fullfile(raw_dir, '**', '*.nc'));
-    if isempty(nc_files)
-        error('ingest:NoFiles', 'No .nc files found in %s', raw_dir);
-    end
+    lon  = grid.lon;
+    lat  = grid.lat;
+    pres = grid.pres;
 
-    % Extract and sort by time
-    n = numel(nc_files);
-    time_str = cell(n, 1);
-    valid = true(n, 1);
-    for i = 1:n
-        match = regexp(nc_files(i).name, '(\d{6})', 'match');
-        if ~isempty(match)
-            time_str{i} = match{end};
-        else
-            valid(i) = false;
+    [nlon, nlat, nz, nt] = size(temp);
+    fprintf('  Grid: %d lon x %d lat x %d depth x %d months\n', nlon, nlat, nz, nt);
+
+    % 2-D coordinate grids for gsw_SA_from_SP
+    [LON2D, LAT2D] = ndgrid(lon, lat);
+
+    % Pre-allocate
+    all_pden    = NaN(nlon, nlat, nz, nt);
+    all_dheight = NaN(nlon, nlat, nz, nt);
+
+    for it = 1:nt
+        % --- Potential density (σ₀, referenced to 0 dbar) ---
+        for iz = 1:nz
+            SP = sal(:, :, iz, it);
+            t  = temp(:, :, iz, it);
+            p  = pres(iz);
+
+            SA = gsw_SA_from_SP(SP, p, LON2D, LAT2D);
+            CT = gsw_CT_from_t(SA, t, p);
+            all_pden(:, :, iz, it) = gsw_rho(SA, CT, 0) - 1000;
         end
-    end
-    nc_files = nc_files(valid);
-    time_str = time_str(valid);
-    [time_str, sort_idx] = sort(time_str);
-    nc_files = nc_files(sort_idx);
 
-    % Subset indices
-    lo1 = cfg.moaa.lon_range(1);
-    lo2 = cfg.moaa.lon_range(2);
-    la1 = cfg.moaa.lat_start;
-    nz  = cfg.moaa.depth_levels;
+        % --- Dynamic height (integrate over full water column) ---
+        %  gsw_geo_strf_dyn_height expects (nz x nprofiles) arrays
+        %  with pressure monotonically increasing along dim-1.
+        SA_col = NaN(nz, nlon * nlat);
+        CT_col = NaN(nz, nlon * nlat);
+        for iz = 1:nz
+            SP = sal(:, :, iz, it);
+            t  = temp(:, :, iz, it);
+            p  = pres(iz);
+            sa = gsw_SA_from_SP(SP, p, LON2D, LAT2D);
+            ct = gsw_CT_from_t(sa, t, p);
+            SA_col(iz, :) = sa(:);
+            CT_col(iz, :) = ct(:);
+        end
+        dh = gsw_geo_strf_dyn_height(SA_col, CT_col, pres(:), 0);
+        all_dheight(:, :, :, it) = reshape(dh, [nlon, nlat, nz]);
 
-    % Detect lat dimension end from first file
-    first_path = fullfile(nc_files(1).folder, nc_files(1).name);
-    lat_full = double(ncread(first_path, cfg.moaa.vars.lat));
-    la2 = numel(lat_full);
-
-    nlon = numel(grid.lon);
-    nlat = numel(grid.lat);
-    nt_grid = numel(grid.time);
-    n_files = min(numel(nc_files), nt_grid);
-
-    fprintf('  Reading %d files\n', n_files);
-
-    all_pden    = NaN(nlon, nlat, nz, n_files);
-    all_dheight = NaN(nlon, nlat, nz, n_files);
-
-    for i = 1:n_files
-        nc_path = fullfile(nc_files(i).folder, nc_files(i).name);
-        pd = ncread(nc_path, cfg.moaa.vars.pden);
-        dh = ncread(nc_path, cfg.moaa.vars.dh);
-
-        nz_file = min(nz, size(pd, 3));
-        all_pden(:,:,1:nz_file,i)    = double(pd(lo1:lo2, la1:la2, 1:nz_file));
-        all_dheight(:,:,1:nz_file,i) = double(dh(lo1:lo2, la1:la2, 1:nz_file));
-
-        if mod(i, 60) == 0
-            fprintf('  %d / %d files read\n', i, n_files);
+        if mod(it, 60) == 0
+            fprintf('  %d / %d months computed\n', it, nt);
         end
     end
 
@@ -76,8 +77,8 @@ function read_moaa_density(cfg)
     save_var(cfg, fullfile(base, 'pden.mat'),    'pden',    all_pden);
     save_var(cfg, fullfile(base, 'dheight.mat'), 'dheight', all_dheight);
 
-    update_manifest(cfg, 'base_data', 'pden',    {});
-    update_manifest(cfg, 'base_data', 'dheight', {});
+    update_manifest(cfg, 'base_data', 'pden',    {'temp', 'sal'});
+    update_manifest(cfg, 'base_data', 'dheight', {'temp', 'sal'});
 
-    fprintf('[ingest] MOAA GPV density/DH complete: %d months\n', n_files);
+    fprintf('[ingest] Potential density / dynamic height complete: %d months\n', nt);
 end

@@ -45,12 +45,11 @@ function read_moaa_temp_sal(cfg)
     lat_full  = double(ncread(first_path, cfg.moaa.vars.lat));
     pres_full = double(ncread(first_path, cfg.moaa.vars.pres));
 
-    % Determine subset indices
-    lo1 = cfg.moaa.lon_range(1);
-    lo2 = cfg.moaa.lon_range(2);
-    la1 = cfg.moaa.lat_start;
-    la2 = numel(lat_full);
-    nz  = min(cfg.moaa.depth_levels, numel(pres_full));
+    % Determine subset indices from physical coordinates
+    [lo1, lo2] = find_range_indices(lon_full, cfg.target_lon);
+    [la1, la2] = find_range_indices(lat_full, cfg.target_lat);
+    nz = find(pres_full <= cfg.moaa.max_depth, 1, 'last');
+    if isempty(nz), nz = numel(pres_full); end
 
     lon  = lon_full(lo1:lo2);
     lat  = lat_full(la1:la2);

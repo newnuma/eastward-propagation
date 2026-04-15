@@ -10,10 +10,7 @@ function read_ncep_flux(cfg)
     fprintf('[ingest] Reading NCEP flux\n');
 
     grid    = load_grid(cfg);
-    raw_dir = fullfile(cfg.paths.data_root, cfg.paths.raw.ncep_flux);
-
-    lr = cfg.ncep.flux.lon_range;
-    ar = cfg.ncep.flux.lat_range;
+    raw_dir = fullfile(cfg.paths.data_root, cfg.paths.raw.ncep);
 
     % Read coordinates and time from reference file
     ref_file = fullfile(raw_dir, cfg.ncep.flux.files.lw);
@@ -21,12 +18,17 @@ function read_ncep_flux(cfg)
     src_lat  = double(ncread(ref_file, 'lat'));
     raw_time = double(ncread(ref_file, 'time'));
 
+    % Determine subset indices (add buffer for interpolation to target grid)
+    buf = 5;  % degrees buffer for regridding margin
+    [lr1, lr2] = find_range_indices(src_lon, cfg.target_lon + [-buf buf]);
+    [ar1, ar2] = find_range_indices(src_lat, cfg.target_lat + [-buf buf]);
+
     % Match NCEP time (hours since 1800-01-01) to target time vector
     ncep_times = datetime(1800, 1, 1) + hours(raw_time);
     time_idx = match_times(ncep_times, grid.time);
 
-    sub_lon = src_lon(lr(1):lr(2));
-    sub_lat = src_lat(ar(1):ar(2));
+    sub_lon = src_lon(lr1:lr2);
+    sub_lat = src_lat(ar1:ar2);
 
     % Read each component
     lh_raw = ncread(fullfile(raw_dir, cfg.ncep.flux.files.lh), 'lhtfl');
@@ -34,10 +36,10 @@ function read_ncep_flux(cfg)
     lw_raw = ncread(fullfile(raw_dir, cfg.ncep.flux.files.lw), 'nlwrs');
     sw_raw = ncread(fullfile(raw_dir, cfg.ncep.flux.files.sw), 'nswrs');
 
-    lh = lh_raw(lr(1):lr(2), ar(1):ar(2), time_idx);
-    sh = sh_raw(lr(1):lr(2), ar(1):ar(2), time_idx);
-    lw = lw_raw(lr(1):lr(2), ar(1):ar(2), time_idx);
-    sw = sw_raw(lr(1):lr(2), ar(1):ar(2), time_idx);
+    lh = lh_raw(lr1:lr2, ar1:ar2, time_idx);
+    sh = sh_raw(lr1:lr2, ar1:ar2, time_idx);
+    lw = lw_raw(lr1:lr2, ar1:ar2, time_idx);
+    sw = sw_raw(lr1:lr2, ar1:ar2, time_idx);
     net = lh + sh + lw + sw;
 
     % Regrid all components to target grid

@@ -11,27 +11,17 @@ function data = anomaly_sum(data, grid)
 %       .ysum — yearly anomaly sum (lon x lat x nyear)
 
     x = data.raw;
-    lon = grid.lon;  lat = grid.lat;  time = grid.time;
+    time = grid.time;
+    LO = numel(grid.lon);  LA = numel(grid.lat);  TI = numel(time);
 
-    LO = numel(lon);  LA = numel(lat);  TI = numel(time);
-    YE = numel(grid.year);
-
-    % Reshape to (time x space)
-    x_flat = reshape(permute(x, [3 1 2]), [TI, LO*LA]);
-
-    % Monthly climatology
-    mon = month(time);
-    clim_flat = NaN(12, LO*LA);
-    for im = 1:12
-        idx = (mon == im);
-        if any(idx)
-            clim_flat(im, :) = mean(x_flat(idx, :), 1, 'omitnan');
-        end
+    % Climatology (reuse if already computed)
+    if ~isfield(data, 'clim')
+        data.clim = compute_climatology(x, grid);
     end
 
     % Anomaly
-    clim_rep = repmat(permute(reshape(clim_flat, [12 LO LA]), [2 3 1]), [1 1 YE]);
-    anom = x - clim_rep;
+    mon = month(time);
+    anom = x - data.clim(:, :, mon);
 
     % Yearly sum
     anom_flat = reshape(permute(anom, [3 1 2]), [TI, LO*LA]);

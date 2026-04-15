@@ -1,7 +1,7 @@
-function result = dt(data, grid)
-%DT Compute temporal change rate (forward difference).
+function result = temporal_tendency(data, grid)
+%TEMPORAL_TENDENCY Compute temporal change rate (forward difference).
 %
-%   result = dt(data, grid)
+%   result = temporal_tendency(data, grid)
 %
 %   dT/dt ≈ [ T_avg(t+1) - T_avg(t) ] where T_avg is centered monthly mean
 %

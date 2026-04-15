@@ -1,7 +1,7 @@
-function results = interpolate(pden, temp, grid, target_densities)
-%INTERPOLATE Interpolate temperature onto isopycnal surfaces.
+function results = isopycnal_interp(pden, temp, grid, target_densities)
+%ISOPYCNAL_INTERP Interpolate temperature onto isopycnal surfaces.
 %
-%   results = interpolate(pden, temp, grid, target_densities)
+%   results = isopycnal_interp(pden, temp, grid, target_densities)
 %
 %   Inputs:
 %       pden             : 4D potential density (lon x lat x depth x time)
@@ -61,10 +61,8 @@ function results = interpolate(pden, temp, grid, target_densities)
         results.(field).nan_count = nan_count;
 
         % Apply anomaly processing
-        results.(field).depth = anomaly(results.(field).depth, grid);
-        results.(field).depth = anomaly_detrend(results.(field).depth, grid);
-        results.(field).temp  = anomaly(results.(field).temp, grid);
-        results.(field).temp  = anomaly_detrend(results.(field).temp, grid);
+        results.(field).depth = anomaly(results.(field).depth, grid, 'Detrend', true);
+        results.(field).temp  = anomaly(results.(field).temp, grid, 'Detrend', true);
     end
 end
 

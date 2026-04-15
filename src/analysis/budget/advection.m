@@ -1,7 +1,8 @@
-function result = advection(cfg, grid, alldata, mld, depth_mode)
+function result = advection(cfg, grid, alldata, mld, depth_mode, cached)
 %ADVECTION Compute horizontal heat advection term.
 %
 %   result = advection(cfg, grid, alldata, mld, depth_mode)
+%   result = advection(cfg, grid, alldata, mld, depth_mode, cached)
 %
 %   -u_H . grad_H(T)  where u_H = u_G + u_E
 %
@@ -9,35 +10,35 @@ function result = advection(cfg, grid, alldata, mld, depth_mode)
 %       alldata    : 4D data (lon x lat x depth x time)
 %       mld        : mld struct
 %       depth_mode : "ml" for mixed layer, or pressure level index (integer)
+%       cached     : (optional) struct with pre-loaded .wind, .gvel, .pden
 %
 %   Output:
 %       result.x.raw : zonal advection term  (lon x lat x time)
 %       result.y.raw : meridional advection term
 
-    wind = load_var(cfg, fullfile(cfg.paths.base_data, 'wind.mat'), 'wind');
-    gvel = load_var(cfg, fullfile(cfg.paths.base_data, 'gvel.mat'), 'gvel');
-    pden = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden');
+    if nargin < 6, cached = struct(); end
+
+    if isfield(cached, 'wind'), wind = cached.wind;
+    else, wind = load_var(cfg, fullfile(cfg.paths.base_data, 'wind.mat'), 'wind'); end
+    if isfield(cached, 'gvel'), gvel = cached.gvel;
+    else, gvel = load_var(cfg, fullfile(cfg.paths.base_data, 'gvel.mat'), 'gvel'); end
+    if isfield(cached, 'pden'), pden = cached.pden;
+    else, pden = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden'); end
 
     pres = double(grid.pres);
     lat  = grid.lat;  lon = grid.lon;
     nlon = numel(lon); nlat = numel(lat); ntime = numel(grid.time);
+    dims = [nlon, nlat, ntime];
 
     deg2rad = pi / 180;
     rho0  = cfg.const.rho0;
-    omega = cfg.const.omega;
     R     = cfg.const.R;
-    dt_s  = 60 * 60 * 24 * 31;
+    dt_s  = reshape(seconds_per_month(grid.time), 1, 1, 1, []);
 
-    if ischar(depth_mode) || isstring(depth_mode)
-        depth = mld.depth;
-        max_k = 13;
-    else
-        depth = repmat(pres(depth_mode), nlon, nlat, ntime);
-        max_k = depth_mode;
-    end
+    [depth, max_k, use_ml] = resolve_depth(depth_mode, mld, pres, dims, cfg.analysis.max_depth);
 
     % --- Coriolis ---
-    f_vec = 2 * omega * sin(lat(:) * deg2rad);  % (nlat x 1)
+    f_vec = gsw_f(lat(:));  % (nlat x 1)
 
     % Expand to 3D for division
     f_3d = repmat(reshape(f_vec, [1 nlat 1]), [nlon 1 ntime]);
@@ -89,13 +90,13 @@ function result = advection(cfg, grid, alldata, mld, depth_mode)
     end
 
     % --- Advection: -u * dT/dx, -v * dT/dy ---
-    Dtx = -dT_dx .* U * dt_s;
-    Dty = -dT_dy .* V * dt_s;
+    Dtx = -dT_dx .* U .* dt_s;
+    Dty = -dT_dy .* V .* dt_s;
 
     % --- Depth average ---
-    if ischar(depth_mode) || isstring(depth_mode)
-        [Dtx_mean, ~] = mld_mean(Dtx, grid, pden, mld);
-        [Dty_mean, ~] = mld_mean(Dty, grid, pden, mld);
+    if use_ml
+        [Dtx_mean, ~] = mld_mean(Dtx, grid, pden, mld, cfg.analysis.mld_threshold);
+        [Dty_mean, ~] = mld_mean(Dty, grid, pden, mld, cfg.analysis.mld_threshold);
     else
         Dtx_mean = depth_mean(Dtx, pres, 1:max_k);
         Dty_mean = depth_mean(Dty, pres, 1:max_k);

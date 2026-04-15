@@ -1,13 +1,14 @@
-function [ml_mean, ml_bottom] = mld_mean(alldata, grid, pden, mld)
+function [ml_mean, ml_bottom] = mld_mean(alldata, grid, pden, mld, threshold)
 %MLD_MEAN Compute mixed-layer depth mean and bottom value.
 %
-%   [ml_mean, ml_bottom] = mld_mean(alldata, grid, pden, mld)
+%   [ml_mean, ml_bottom] = mld_mean(alldata, grid, pden, mld, threshold)
 %
 %   Inputs:
-%       alldata : 4D array (lon x lat x depth x time)
-%       grid    : grid struct (.lon, .lat, .pres, .time)
-%       pden    : 4D potential density (lon x lat x depth x time)
-%       mld     : struct with .depth (lon x lat x time) and .index
+%       alldata   : 4D array (lon x lat x depth x time)
+%       grid      : grid struct (.lon, .lat, .pres, .time)
+%       pden      : 4D potential density (lon x lat x depth x time)
+%       mld       : struct with .depth (lon x lat x time) and .index
+%       threshold : MLD density criterion [kg/m^3] (from cfg.analysis.mld_threshold)
 %
 %   Outputs:
 %       ml_mean   : mixed-layer average (lon x lat x time)
@@ -18,8 +19,6 @@ function [ml_mean, ml_bottom] = mld_mean(alldata, grid, pden, mld)
     nlat  = numel(grid.lat);
     ntime = numel(grid.time);
 
-    threshold = 0.125;  % same as MLD criterion
-
     % --- Bottom value: interpolate to MLD base ---
     ml_bottom = NaN(nlon, nlat, ntime);
     for ti = 1:ntime
@@ -27,7 +26,7 @@ function [ml_mean, ml_bottom] = mld_mean(alldata, grid, pden, mld)
             for lo = 1:nlon
                 DS = pden(lo, la, 1, ti) + threshold;
                 k = mld.index(lo, la, ti);
-                if k > 1 && k < 13
+                if k > 1 && k <= size(alldata, 3)
                     ml_bottom(lo,la,ti) = ...
                         (DS - pden(lo,la,k-1,ti)) * ...
                         (alldata(lo,la,k,ti) - alldata(lo,la,k-1,ti)) / ...

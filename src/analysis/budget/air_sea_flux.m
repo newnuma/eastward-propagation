@@ -13,17 +13,14 @@ function result = air_sea_flux(cfg, grid, mld, depth_mode)
 
     flux = load_var(cfg, fullfile(cfg.paths.base_data, 'flux.mat'), 'flux');
     pres = double(grid.pres);
+    dims = [numel(grid.lon), numel(grid.lat), numel(grid.time)];
+
+    [depth, ~, ~] = resolve_depth(depth_mode, mld, pres, dims, cfg.analysis.max_depth);
 
     cp   = cfg.const.cp;
     rho0 = cfg.const.rho0;
-    dt_s = 60 * 60 * 24 * 31;   % seconds per month
+    dt_s = reshape(seconds_per_month(grid.time), 1, 1, []);
 
-    if ischar(depth_mode) || isstring(depth_mode)
-        depth = mld.depth;
-    else
-        depth = repmat(pres(depth_mode), numel(grid.lon), numel(grid.lat), numel(grid.time));
-    end
-
-    result.raw = -flux.net ./ (depth * rho0 * cp) * dt_s;
+    result.raw = -flux.net ./ (depth * rho0 * cp) .* dt_s;
     result = anomaly(result, grid);
 end

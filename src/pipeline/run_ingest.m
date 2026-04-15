@@ -5,7 +5,7 @@ function cfg = run_ingest(cfg)
 %
 %   Steps:
 %     1. MOAA GPV temperature & salinity → temp.mat, sal.mat, grid.mat
-%     2. MOAA GPV density & dynamic height → pden.mat, dheight.mat
+%     2. Potential density & dynamic height (TEOS-10) → pden.mat, dheight.mat
 %     3. Geostrophic velocity from dynamic height → gvel.mat
 %     4. NCEP heat flux → flux.mat
 %     5. NCEP wind stress & curl → wind.mat

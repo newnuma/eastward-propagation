@@ -13,15 +13,17 @@ function curl = wsc(lat, lon, taux, tauy)
 %       curl : wind stress curl (nlon x nlat), permuted to match project convention
 
     deg2rad = pi / 180;
+    R = 6371000;                        % Earth radius [m] (consistent with cfg.const.R)
+    m_per_deg = R * deg2rad;            % metres per degree
     [nlat, nlon] = size(taux);
     dlat = mean(diff(lat));
-    dy = dlat * 111176;   % meridional grid spacing [m]
+    dy = dlat * m_per_deg;              % meridional grid spacing [m]
 
     % Zonal distance at each latitude [m]
     dx = NaN(nlat, nlon);
     for i = 1:nlat
         for j = 1:nlon
-            dx(i, j) = lon(j) * 111176 * cos(lat(i) * deg2rad);
+            dx(i, j) = lon(j) * m_per_deg * cos(lat(i) * deg2rad);
         end
     end
 

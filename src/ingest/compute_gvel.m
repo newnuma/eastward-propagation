@@ -21,7 +21,7 @@ function compute_gvel(cfg)
     R = cfg.const.R;
 
     % Coriolis parameter at each latitude
-    f = 2 * cfg.const.omega * sin(lat(:) * deg2rad);   % (nlat x 1)
+    f = gsw_f(lat(:));   % (nlat x 1)
 
     dlon = mean(diff(lon)) * deg2rad;   % grid spacing in radians
     dlat = mean(diff(lat)) * deg2rad;

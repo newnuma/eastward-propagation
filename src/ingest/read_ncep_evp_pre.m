@@ -10,10 +10,7 @@ function read_ncep_evp_pre(cfg)
     fprintf('[ingest] Reading NCEP evp/pre\n');
 
     grid    = load_grid(cfg);
-    raw_dir = fullfile(cfg.paths.data_root, cfg.paths.raw.ncep_evp);
-
-    lr = cfg.ncep.evp_pre.lon_range;
-    ar = cfg.ncep.evp_pre.lat_range;
+    raw_dir = fullfile(cfg.paths.data_root, cfg.paths.raw.ncep);
 
     % Read coordinates and time from reference file
     ref_file = fullfile(raw_dir, cfg.ncep.evp_pre.files.prate);
@@ -21,19 +18,24 @@ function read_ncep_evp_pre(cfg)
     src_lat  = double(ncread(ref_file, 'lat'));
     raw_time = double(ncread(ref_file, 'time'));
 
+    % Determine subset indices (add buffer for interpolation to target grid)
+    buf = 5;  % degrees buffer for regridding margin
+    [lr1, lr2] = find_range_indices(src_lon, cfg.target_lon + [-buf buf]);
+    [ar1, ar2] = find_range_indices(src_lat, cfg.target_lat + [-buf buf]);
+
     % Match time
     ncep_times = datetime(1800, 1, 1) + hours(raw_time);
     time_idx = match_times(ncep_times, grid.time);
 
-    sub_lon = src_lon(lr(1):lr(2));
-    sub_lat = src_lat(ar(1):ar(2));
+    sub_lon = src_lon(lr1:lr2);
+    sub_lat = src_lat(ar1:ar2);
 
     % Read data
     prate_raw = ncread(fullfile(raw_dir, cfg.ncep.evp_pre.files.prate), 'prate');
     skt_raw   = ncread(fullfile(raw_dir, cfg.ncep.evp_pre.files.skt),   'skt');
 
-    prate_sub = prate_raw(lr(1):lr(2), ar(1):ar(2), time_idx);
-    skt_sub   = skt_raw(lr(1):lr(2),   ar(1):ar(2), time_idx);
+    prate_sub = prate_raw(lr1:lr2, ar1:ar2, time_idx);
+    skt_sub   = skt_raw(lr1:lr2,   ar1:ar2, time_idx);
 
     % Regrid to target
     evp_pre.prate = regrid_to_target(prate_sub, sub_lon, sub_lat, grid.lon, grid.lat);
