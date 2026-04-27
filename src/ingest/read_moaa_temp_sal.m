@@ -12,8 +12,12 @@ function read_moaa_temp_sal(cfg)
     raw_dir = fullfile(cfg.paths.data_root, cfg.paths.raw.moaa_ts);
     fprintf('[ingest] Reading MOAA GPV temp/sal from %s\n', raw_dir);
 
-    % Find all NetCDF files recursively
+    % Find all NetCDF files recursively.
+    % Exclude AppleDouble sidecar files (._*.nc) and other hidden dotfiles
+    % that may appear on macOS volumes but are not valid NetCDF files.
     nc_files = dir(fullfile(raw_dir, '**', '*.nc'));
+    is_hidden = startsWith({nc_files.name}, '.');
+    nc_files = nc_files(~is_hidden);
     if isempty(nc_files)
         error('ingest:NoFiles', 'No .nc files found in %s', raw_dir);
     end
