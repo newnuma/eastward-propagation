@@ -28,7 +28,7 @@ function cfg = create_config(data_root)
     cfg.target_lat = [-24.5, 65.5];    % latitude range [degrees North]
 
     %% --- MOAA GPV settings -----------------------------------------------
-    cfg.moaa.max_depth = 1000;         % maximum depth to read [dbar]
+    cfg.moaa.max_depth = 500;         % maximum depth to read [dbar]
 
     % NetCDF variable names
     cfg.moaa.vars.temp = 'TOI';
