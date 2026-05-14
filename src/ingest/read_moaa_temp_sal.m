@@ -66,17 +66,21 @@ function read_moaa_temp_sal(cfg)
 
     fprintf('  Grid: %d lon x %d lat x %d depth x %d months\n', nlon, nlat, nz, nt);
 
+    temp_nd = numel(ncinfo(first_path, cfg.moaa.vars.temp).Size);
+    sal_nd = numel(ncinfo(first_path, cfg.moaa.vars.sal).Size);
+
     % Pre-allocate
     all_temp = NaN(nlon, nlat, nz, nt);
     all_sal  = NaN(nlon, nlat, nz, nt);
 
-    % Read all files
+    % Read all files. Use NetCDF hyperslab reads so MATLAB does not load
+    % the global field before extracting the target region.
     for i = 1:nt
         nc_path = fullfile(nc_files(i).folder, nc_files(i).name);
-        t = ncread(nc_path, cfg.moaa.vars.temp);
-        s = ncread(nc_path, cfg.moaa.vars.sal);
-        all_temp(:,:,:,i) = double(t(lo1:lo2, la1:la2, 1:nz));
-        all_sal(:,:,:,i)  = double(s(lo1:lo2, la1:la2, 1:nz));
+        all_temp(:,:,:,i) = read_moaa_subset(nc_path, cfg.moaa.vars.temp, ...
+            lo1, la1, nlon, nlat, nz, temp_nd);
+        all_sal(:,:,:,i) = read_moaa_subset(nc_path, cfg.moaa.vars.sal, ...
+            lo1, la1, nlon, nlat, nz, sal_nd);
 
         if mod(i, 60) == 0
             fprintf('  %d / %d files read\n', i, nt);
@@ -101,4 +105,21 @@ function read_moaa_temp_sal(cfg)
 
     fprintf('[ingest] MOAA GPV temp/sal complete: %d months (%s — %s)\n', ...
         nt, datestr(time_vec(1),'yyyy/mm'), datestr(time_vec(end),'yyyy/mm'));
+end
+
+function data = read_moaa_subset(nc_path, var_name, lo1, la1, nlon, nlat, nz, nd)
+%READ_MOAA_SUBSET Read a lon/lat/depth subset from a MOAA variable.
+    if nd < 3
+        error('ingest:UnexpectedDimensions', ...
+            'Variable %s in %s has fewer than 3 dimensions.', var_name, nc_path);
+    end
+
+    start = [lo1, la1, 1, ones(1, nd - 3)];
+    count = [nlon, nlat, nz, ones(1, nd - 3)];
+    data = double(squeeze(ncread(nc_path, var_name, start, count)));
+
+    expected_size = [nlon, nlat, nz];
+    if ~isequal(size(data), expected_size)
+        data = reshape(data, expected_size);
+    end
 end
