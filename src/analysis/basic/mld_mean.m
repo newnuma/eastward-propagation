@@ -38,9 +38,11 @@ function [ml_mean, ml_bottom] = mld_mean(alldata, grid, pden, mld, threshold)
     end
 
     % --- Depth-integrated mean from surface to MLD ---
-    % Prepend 0-m level (copy 10-m value)
-    data_ext = cat(3, alldata(:,:,1,:), alldata(:,:,1:12,:));
-    pres_ext = [0; double(pres(1:12))];
+    % Prepend 0-m level (copy shallowest value). Use all available pressure
+    % levels because MLD can reach the configured search depth.
+    nz = min(size(alldata, 3), numel(pres));
+    data_ext = cat(3, alldata(:,:,1,:), alldata(:,:,1:nz,:));
+    pres_ext = [0; double(pres(1:nz))];
 
     ml_mean = NaN(nlon, nlat, ntime);
     for ti = 1:ntime
@@ -48,7 +50,7 @@ function [ml_mean, ml_bottom] = mld_mean(alldata, grid, pden, mld, threshold)
             for lo = 1:nlon
                 k = mld.index(lo, la, ti);
                 d = mld.depth(lo, la, ti);
-                if k < 2 || d <= 0, continue; end
+                if k < 2 || k > nz || isnan(d) || d <= 0, continue; end
 
                 vals = squeeze(data_ext(lo, la, 1:k, ti));
                 vals = [vals; ml_bottom(lo, la, ti)];

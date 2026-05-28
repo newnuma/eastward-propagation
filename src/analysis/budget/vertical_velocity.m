@@ -88,9 +88,11 @@ function vg_int = integrate_vg_to_mld(vg_v, pden, pres, mld, grid, cfg)
     nlon = numel(grid.lon); nlat = numel(grid.lat); ntime = numel(grid.time);
     threshold = cfg.analysis.mld_threshold;
 
-    % Extend vg with 0-m level
-    vg_ext = cat(3, vg_v(:,:,1,:), vg_v(:,:,1:12,:));
-    pres_ext = [0; double(pres(1:12))];
+    % Extend vg with 0-m level. Use all available pressure levels because
+    % MLD can reach the configured search depth.
+    nz = min(size(vg_v, 3), numel(pres));
+    vg_ext = cat(3, vg_v(:,:,1,:), vg_v(:,:,1:nz,:));
+    pres_ext = [0; double(pres(1:nz))];
 
     vg_int = NaN(nlon, nlat, ntime);
     for t = 1:ntime
@@ -98,7 +100,7 @@ function vg_int = integrate_vg_to_mld(vg_v, pden, pres, mld, grid, cfg)
             for lo = 1:nlon
                 k = mld.index(lo, la, t);
                 d = mld.depth(lo, la, t);
-                if k < 2 || isnan(d) || d <= 0, continue; end
+                if k < 2 || k > nz || isnan(d) || d <= 0, continue; end
 
                 % Interpolate vg to MLD base
                 DS = pden(lo,la,1,t) + threshold;
