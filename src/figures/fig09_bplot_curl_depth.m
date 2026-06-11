@@ -3,16 +3,13 @@ function fig09_bplot_curl_depth(cfg)
 %   Box-averaged (210 E30°E, 40 E0°N).
 
     grid = load_grid(cfg);
-    Depth = load_var(cfg, 'Depth');
-    curl  = load_var(cfg, 'curl');
+    Depth = load_figure_var(cfg, 'Depth');
+    curl  = load_figure_var(cfg, 'curl');
 
     blon = 92:111;  % 210 E30°E
     blat = 61:70;   % 40 E0°N
 
     % 13-month running mean curl anomaly
-    curl_ts = squeeze(mean(movmean(curl.anom, 13, 3, 'omitnan'), [1 2], 'omitnan'));
-    curl_ts = squeeze(mean(reshape(curl_ts(blon, blat, :), [], size(curl.anom, 3)), 1, 'omitnan'))';
-    % Re-extract properly
     curl3d = movmean(curl.anom, 13, 3, 'omitnan');
     curl_ts = squeeze(mean(curl3d(blon, blat, :), [1 2], 'omitnan'));
 

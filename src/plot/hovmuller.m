@@ -48,9 +48,11 @@ function [fig, ax] = hovmuller(data, lon, time, opts)
     nlon  = numel(lon);
     ntime = numel(time);
 
-    % Build meshgrid
-    LG = repelem(lon(:)', 1, ntime);   % nlon-by-ntime via repelem on row
-    TI = repmat(time(:)', nlon, 1);
+    % Build meshgrid. Use datenum internally because contour does not
+    % accept datetime grids in all MATLAB versions.
+    time_num = datenum(time);
+    LG = repmat(lon(:), 1, ntime);
+    TI = repmat(time_num(:)', nlon, 1);
 
     % Pcolor data — boundary NaN
     HD = data;
@@ -95,8 +97,8 @@ function [fig, ax] = hovmuller(data, lon, time, opts)
 
     % Y-ticks
     yi  = 1:opts.ytick_interval:ntime;
-    yticks(ax, time(yi));
-    ytickformat(ax, 'yyyy');
+    yticks(ax, time_num(yi));
+    yticklabels(ax, cellstr(datestr(time(yi), 'yyyy')));
 
     ax.TickDir = 'both';
     ax.XAxis.FontSize = 10;
@@ -112,7 +114,8 @@ function [fig, ax] = hovmuller(data, lon, time, opts)
     if ~isempty(opts.box_lon) && ~isempty(opts.box_time)
         hold(ax, 'on');
         bx = [opts.box_lon(1) opts.box_lon(2) opts.box_lon(2) opts.box_lon(1) opts.box_lon(1)];
-        bt = [opts.box_time(1) opts.box_time(1) opts.box_time(2) opts.box_time(2) opts.box_time(1)];
+        box_time_num = datenum(opts.box_time);
+        bt = [box_time_num(1) box_time_num(1) box_time_num(2) box_time_num(2) box_time_num(1)];
         line(ax, bx, bt, 'Color', opts.box_color, 'LineWidth', 1.5, 'LineStyle', '--');
     end
 end

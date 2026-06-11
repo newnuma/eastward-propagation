@@ -4,19 +4,11 @@ function fig11_vertical_section_lon(cfg)
 
     grid = load_grid(cfg);
 
-    % Load full-depth fields
-    base = fullfile(cfg.paths.data_root, cfg.paths.base_data);
-    S = load(fullfile(base, 'temp_sal.mat'), 'temp', 'sal');
-    P = load(fullfile(base, 'density.mat'), 'pden');
-    temp_all = S.temp;
-    sal_all  = S.sal;
-    pod_all  = P.pden;
+    temp_all = load_var(cfg, fullfile(cfg.paths.base_data, 'temp.mat'), 'temp');
+    sal_all  = load_var(cfg, fullfile(cfg.paths.base_data, 'sal.mat'), 'sal');
+    pod_all  = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden');
 
-    % Anomaly versions
-    Temp = load_var(cfg, 'Temp');
-    Salt = load_var(cfg, 'Salt');
-
-    blat = 61:70;  bp = 1:13;
+    blat = 61:70;  bp = 1:numel(grid.pres);
     pres_lin = (10:10:500)';
 
     % Two snapshot periods (adjustable)
@@ -58,14 +50,16 @@ function fig11_vertical_section_lon(cfg)
         fig = figure('Position', [0 0 500 600]);
 
         for h = 1:3
-            [~, axs] = lon_depth_section(data{h}', grid.lon, pres_lin, ...
+            ax = subplot(3, 1, h, 'Parent', fig);
+            lon_depth_section(data{h}, grid.lon, pres_lin, ...
                 'clim', clims_list{h}, ...
                 'lon_range', [190 233], 'depth_range', [10 500], ...
                 'titles', titles_list(h), ...
                 'fig_size', [500 600], ...
                 'density_data', pod_lin', ...
                 'density_levels', [25 25.5 26 26.5], ...
-                'rows', 3, 'cols', 1);
+                'show_colorbar', h == 3, ...
+                'parent_axes', ax);
         end
 
         outdir = fullfile(cfg.paths.data_root, cfg.paths.figures);

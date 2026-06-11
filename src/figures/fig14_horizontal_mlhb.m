@@ -3,8 +3,8 @@ function fig14_horizontal_mlhb(cfg)
 %   6 rows x 6 cols: dT/dt, surface flux, entrainment, adv-x, adv-y, SLP.
 
     grid = load_grid(cfg);
-    mlhb = load_var(cfg, 'mlhb');
-    slp  = load_var(cfg, 'slp');
+    mlhb = load_figure_var(cfg, 'mlhb');
+    slp  = load_figure_var(cfg, 'slp');
 
     start_year = 11;  % 2011
     nyears = 6;

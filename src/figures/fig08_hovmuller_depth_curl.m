@@ -3,8 +3,8 @@ function fig08_hovmuller_depth_curl(cfg)
 %   2 panels side by side.
 
     grid = load_grid(cfg);
-    Depth = load_var(cfg, 'Depth');
-    curl  = load_var(cfg, 'curl');
+    Depth = load_figure_var(cfg, 'Depth');
+    curl  = load_figure_var(cfg, 'curl');
 
     lat_idx = 61:70;
 

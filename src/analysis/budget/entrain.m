@@ -25,7 +25,7 @@ function result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
     nlon = numel(grid.lon); nlat = numel(grid.lat); ntime = numel(grid.time);
     dims = [nlon, nlat, ntime];
 
-    [depth, ~, use_ml] = resolve_depth(depth_mode, mld, pres, dims, cfg.analysis.max_depth);
+    [depth, max_k, use_ml] = resolve_depth(depth_mode, mld, pres, dims, cfg.analysis.max_depth);
 
     % Vertical velocity at layer base
     wh_out = vertical_velocity(cfg, grid, mld, depth_mode, cached);
@@ -54,8 +54,8 @@ function result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
         end
         bottom_data = (bottom_now + bottom_next) / 2;
     else
-        mean_data = depth_mean(alldata, pres, 1:depth_mode);
-        bottom_data = squeeze(alldata(:, :, depth_mode, :));
+        mean_data = depth_mean(alldata, pres, 1:max_k);
+        bottom_data = squeeze(alldata(:, :, max_k, :));
     end
 
     % Entrainment calculation

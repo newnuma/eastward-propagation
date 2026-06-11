@@ -2,11 +2,7 @@ function fig16_horizontal_flux_dh(cfg)
 %FIG16_HORIZONTAL_FLUX_DH  Fig.16: Total heat flux + dynamic height contour.
 
     grid = load_grid(cfg);
-    flux = load_var(cfg, 'flux');
-
-    base = fullfile(cfg.paths.data_root, cfg.paths.base_data);
-    D = load(fullfile(base, 'density.mat'), 'dh');
-    dh = D.dh;
+    flux = load_figure_var(cfg, 'flux');
 
     [fig, ~] = horizontal_map(squeeze(flux.total), grid.lon, grid.lat, ...
         'clim', [-50 50], ...

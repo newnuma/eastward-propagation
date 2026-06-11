@@ -4,8 +4,8 @@ function fig06_hovmuller_150m(cfg)
 %     (a) monthly anomaly, (b) detrended, (c) difference.
 
     grid = load_grid(cfg);
-    Temp = load_var(cfg, 'Temp');
-    Salt = load_var(cfg, 'Salt');
+    Temp = load_figure_var(cfg, 'Temp');
+    Salt = load_figure_var(cfg, 'Salt');
 
     lat_idx = 61:70;
 

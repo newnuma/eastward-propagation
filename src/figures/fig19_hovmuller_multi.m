@@ -3,7 +3,7 @@ function fig19_hovmuller_multi(cfg)
 %   5 cols: T(10m), T(150m), T(10-300m), T(iso260), + blank or extra.
 
     grid = load_grid(cfg);
-    Temp  = load_var(cfg, 'Temp');
+    Temp  = load_figure_var(cfg, 'Temp');
 
     lat_idx = 61:70;
 

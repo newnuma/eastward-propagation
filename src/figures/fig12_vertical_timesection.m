@@ -5,22 +5,22 @@ function fig12_vertical_timesection(cfg)
 
     grid = load_grid(cfg);
 
-    base = fullfile(cfg.paths.data_root, cfg.paths.base_data);
-    S = load(fullfile(base, 'temp_sal.mat'), 'temp', 'sal');
-    P = load(fullfile(base, 'density.mat'), 'pden');
+    temp = load_var(cfg, fullfile(cfg.paths.base_data, 'temp.mat'), 'temp');
+    sal  = load_var(cfg, fullfile(cfg.paths.base_data, 'sal.mat'), 'sal');
+    pden = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden');
 
-    blon = 92:111;  blat = 61:70;  bp = 1:11;
+    blon = 92:111;  blat = 61:70;  bp = find(grid.pres <= 200);
     pres_lin = (10:5:200)';
 
     % Compute area-mean anomaly profiles over time
-    temp_a = S.temp - mean(S.temp, 4, 'omitnan');  % quick monthly anomaly
-    sal_a  = S.sal  - mean(S.sal,  4, 'omitnan');
-    pod_a  = P.pden - mean(P.pden, 4, 'omitnan');
+    temp_a = temp - mean(temp, 4, 'omitnan');  % quick monthly anomaly
+    sal_a  = sal  - mean(sal,  4, 'omitnan');
+    pod_a  = pden - mean(pden, 4, 'omitnan');
 
     temp_ts = squeeze(mean(temp_a(blon, blat, bp, :), [1 2], 'omitnan'));
     sal_ts  = squeeze(mean(sal_a(blon, blat, bp, :),  [1 2], 'omitnan'));
     pod_ts  = squeeze(mean(pod_a(blon, blat, bp, :),  [1 2], 'omitnan'));
-    pod_raw = squeeze(mean(P.pden(blon, blat, bp, :), [1 2], 'omitnan'));
+    pod_raw = squeeze(mean(pden(blon, blat, bp, :), [1 2], 'omitnan'));
 
     ntime = numel(grid.time);
 
@@ -33,14 +33,14 @@ function fig12_vertical_timesection(cfg)
     for t = 1:ntime
         temp_lin(t,:) = interp1(grid.pres(bp), temp_ts(:,t), pres_lin);
         sal_lin(t,:)  = interp1(grid.pres(bp), sal_ts(:,t),  pres_lin);
-        pod_alin(t,:) = interp1(grid.pres(bp), pod_a_ts(:,t), pres_lin);
+        pod_alin(t,:) = interp1(grid.pres(bp), pod_ts(:,t), pres_lin);
         pod_rlin(t,:) = interp1(grid.pres(bp), pod_raw(:,t), pres_lin);
     end
 
     % MLD for overlay
     mld_file = fullfile(cfg.paths.data_root, cfg.paths.analysis, 'mld.mat');
     M = load(mld_file, 'mld');
-    mld_ts = squeeze(mean(M.mld(blon, blat, :), [1 2], 'omitnan'));
+    mld_ts = squeeze(mean(M.mld.depth(blon, blat, :), [1 2], 'omitnan'));
 
     time_range = [grid.time(144) grid.time(193)];  % ~2013 E017
 

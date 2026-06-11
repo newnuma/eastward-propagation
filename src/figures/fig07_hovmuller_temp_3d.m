@@ -3,7 +3,7 @@ function fig07_hovmuller_temp_3d(cfg)
 %   3 panels: anomaly, detrended, difference (same pattern as fig06).
 
     grid = load_grid(cfg);
-    Temp = load_var(cfg, 'Temp');
+    Temp = load_figure_var(cfg, 'Temp');
 
     lat_idx = 61:70;
     clim = [-1.5 1.5];

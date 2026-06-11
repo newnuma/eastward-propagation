@@ -3,7 +3,7 @@ function fig15_timeseries_mlhb(cfg)
 %   Box average 210 E30°E, 40 E0°N with 13-month moving average.
 
     grid = load_grid(cfg);
-    mlhb = load_var(cfg, 'mlhb');
+    mlhb = load_figure_var(cfg, 'mlhb');
 
     blon = 92:111;  blat = 61:70;  % 210 E30°E, 40 E0°N
     moveM = 13;

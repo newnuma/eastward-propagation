@@ -3,7 +3,7 @@ function fig03_hovmuller_isopycnal_temp(cfg)
 %   3 panels: 25.0ρE 25.5ρE 26.0ρEtemperature anomaly (detrended).
 
     grid = load_grid(cfg);
-    Temp = load_var(cfg, 'Temp');
+    Temp = load_figure_var(cfg, 'Temp');
 
     lat_idx = 61:70;  % 40 E0°N
     fields = {'sig250','sig255','sig260'};

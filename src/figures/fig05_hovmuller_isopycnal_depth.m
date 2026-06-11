@@ -3,7 +3,7 @@ function fig05_hovmuller_isopycnal_depth(cfg)
 %   2 sets of 3 panels: 25.0/25.5/26.0ρEand 26.3/26.5/26.7ρEdepth anomaly.
 
     grid = load_grid(cfg);
-    Depth = load_var(cfg, 'Depth');
+    Depth = load_figure_var(cfg, 'Depth');
 
     lat_idx = 61:70;
 

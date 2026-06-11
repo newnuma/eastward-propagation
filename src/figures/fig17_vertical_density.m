@@ -3,10 +3,9 @@ function fig17_vertical_density(cfg)
 
     grid = load_grid(cfg);
 
-    base = fullfile(cfg.paths.data_root, cfg.paths.base_data);
-    P = load(fullfile(base, 'density.mat'), 'pden');
+    pden = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden');
 
-    blon = 92:111; blat = 61:70; bp = 1:13;
+    blat = 61:70; bp = 1:numel(grid.pres);
     pres_lin = (10:10:500)';
 
     % MLD
@@ -24,7 +23,7 @@ function fig17_vertical_density(cfg)
         y = snapshots{h}.y; m = snapshots{h}.m;
         ti = m + 12*y;
 
-        pod_raw = squeeze(mean(P.pden(:, blat, bp, ti), [2 4], 'omitnan'))';
+        pod_raw = squeeze(mean(pden(:, blat, bp, ti), [2 4], 'omitnan'))';
 
         % Interpolate
         nlon = numel(grid.lon);
@@ -33,7 +32,7 @@ function fig17_vertical_density(cfg)
             pod_lin(:,k) = interp1(grid.pres(bp), pod_raw(:,k), pres_lin);
         end
 
-        mld_snap = squeeze(mean(M.mld(:, blat, ti), 2, 'omitnan'));
+        mld_snap = squeeze(mean(M.mld.depth(:, blat, ti), 2, 'omitnan'));
 
         ax = subplot(2, 2, h);
 

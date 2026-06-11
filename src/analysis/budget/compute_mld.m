@@ -34,14 +34,21 @@ function mld = compute_mld(cfg)
                 while k < nz && DS - pden(lo, la, k, t) > 0
                     k = k + 1;
                 end
-                if k == 1
-                    mld_depth(lo, la, t) = NaN;
-                else
-                    mld_depth(lo, la, t) = ...
-                        (DS - pden(lo,la,k-1,t)) * (pres(k) - pres(k-1)) / ...
-                        (pden(lo,la,k,t) - pden(lo,la,k-1,t)) + pres(k-1);
+                if k == 1 || DS - pden(lo, la, k, t) > 0
+                    continue;
                 end
-                mld_index(lo, la, t) = k;
+
+                dpden = pden(lo,la,k,t) - pden(lo,la,k-1,t);
+                if ~isfinite(dpden) || dpden <= 0
+                    continue;
+                end
+
+                depth = (DS - pden(lo,la,k-1,t)) * (pres(k) - pres(k-1)) / ...
+                    dpden + pres(k-1);
+                if isfinite(depth) && depth >= pres(k-1) && depth <= pres(k)
+                    mld_depth(lo, la, t) = depth;
+                    mld_index(lo, la, t) = k;
+                end
             end
         end
     end

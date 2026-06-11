@@ -3,9 +3,9 @@ function fig13_depth_profile(cfg)
 
     grid = load_grid(cfg);
 
-    base = fullfile(cfg.paths.data_root, cfg.paths.base_data);
-    S = load(fullfile(base, 'temp_sal.mat'), 'temp', 'sal');
-    P = load(fullfile(base, 'density.mat'), 'pden');
+    temp = load_var(cfg, fullfile(cfg.paths.base_data, 'temp.mat'), 'temp');
+    sal  = load_var(cfg, fullfile(cfg.paths.base_data, 'sal.mat'), 'sal');
+    pden = load_var(cfg, fullfile(cfg.paths.base_data, 'pden.mat'), 'pden');
 
     blon = 92:111;  blat = 61:70;
     bp = 1:8;  % top 8 depth levels
@@ -13,10 +13,10 @@ function fig13_depth_profile(cfg)
     y = 15; m = 2;  % target: Feb 2016
     ti = m + 12*(y-1);
 
-    vars = {S.temp, S.sal, P.pden};
-    anom_vars = {S.temp - mean(S.temp, 4, 'omitnan'), ...
-                 S.sal  - mean(S.sal,  4, 'omitnan'), ...
-                 P.pden - mean(P.pden, 4, 'omitnan')};
+    vars = {temp, sal, pden};
+    anom_vars = {temp - mean(temp, 4, 'omitnan'), ...
+                 sal  - mean(sal,  4, 'omitnan'), ...
+                 pden - mean(pden, 4, 'omitnan')};
     var_names = {'temperature','salinity','density'};
 
     for f = 1:3

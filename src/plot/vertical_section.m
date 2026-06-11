@@ -42,8 +42,10 @@ function [fig, ax] = vertical_section(data, time, pres, opts)
     npres = numel(pres);
     ntime = numel(time);
 
-    % Build meshgrid
-    TI = repmat(time(:), 1, npres);
+    % Build meshgrid. Use datenum internally because contour does not
+    % accept datetime grids in all MATLAB versions.
+    time_num = datenum(time);
+    TI = repmat(time_num(:), 1, npres);
     PR = repmat(-pres(:)', ntime, 1);
 
     % Figure / axes
@@ -64,8 +66,9 @@ function [fig, ax] = vertical_section(data, time, pres, opts)
     ylim(ax, [-opts.depth_range(2) -opts.depth_range(1)]);
 
     if ~isempty(opts.time_range)
-        xlim(ax, opts.time_range);
+        xlim(ax, datenum(opts.time_range));
     end
+    datetick(ax, 'x', 'yyyy', 'keeplimits');
 
     ylabel(ax, 'depth [m]');
     ax.TickDir = 'both';
@@ -85,17 +88,14 @@ function [fig, ax] = vertical_section(data, time, pres, opts)
     % Density contours
     if ~isempty(opts.density_data)
         hold(ax, 'on');
-        % Convert time to numeric for contour
-        t_num = days(time - time(1));
-        TIn = repmat(t_num(:), 1, npres);
-        contour(ax, TIn, PR, opts.density_data, opts.density_levels, ...
+        contour(ax, TI, PR, opts.density_data, opts.density_levels, ...
                 'Color', 'k', 'ShowText', 'off', 'LineWidth', 0.7);
     end
 
     % Mixed-layer depth line
     if ~isempty(opts.mld_data)
         hold(ax, 'on');
-        plot(ax, time, -opts.mld_data(:), opts.mld_color, 'LineWidth', 1);
+        plot(ax, time_num, -opts.mld_data(:), opts.mld_color, 'LineWidth', 1);
     end
 
     hold(ax, 'off');

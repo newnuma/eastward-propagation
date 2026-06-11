@@ -3,7 +3,7 @@ function fig04_hovmuller_isopycnal_temp2(cfg)
 %   3 panels: 26.3ρE 26.5ρE 26.7ρEtemperature anomaly.
 
     grid = load_grid(cfg);
-    Temp = load_var(cfg, 'Temp');
+    Temp = load_figure_var(cfg, 'Temp');
 
     lat_idx = 61:70;
     fields = {'sig263','sig265','sig267'};
@@ -36,7 +36,7 @@ function fig04_hovmuller_isopycnal_temp2(cfg)
 
         ax = subplot_custom(fig, 1, 3, h);
 
-        LG = repelem(grid.lon(:)', 1, ntime);
+        LG = repmat(grid.lon(:), 1, ntime);
         TI = repmat(time_h(:)', numel(grid.lon), 1);
 
         D = pcolor(ax, LG, TI, data2d);

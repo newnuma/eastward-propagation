@@ -3,9 +3,9 @@ function fig18_trend_maps(cfg)
 %   3 panels side by side.
 
     grid = load_grid(cfg);
-    Temp    = load_var(cfg, 'Temp');
-    Salt    = load_var(cfg, 'Salt');
-    Density = load_var(cfg, 'Density');
+    Temp    = load_figure_var(cfg, 'Temp');
+    Salt    = load_figure_var(cfg, 'Salt');
+    Density = load_figure_var(cfg, 'Density');
 
     % Compute linear trend per grid point (per decade)
     nlon = numel(grid.lon);

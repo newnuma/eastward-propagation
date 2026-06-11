@@ -4,9 +4,9 @@ function fig02_horizontal_anomaly(cfg)
 %   x 6 columns (2011 E016).
 
     grid = load_grid(cfg);
-    Temp    = load_var(cfg, 'Temp');
-    Salt    = load_var(cfg, 'Salt');
-    Density = load_var(cfg, 'Density');
+    Temp    = load_figure_var(cfg, 'Temp');
+    Salt    = load_figure_var(cfg, 'Salt');
+    Density = load_figure_var(cfg, 'Density');
 
     start_year = 11;  % 2011
     nyears = 6;

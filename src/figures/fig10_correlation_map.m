@@ -3,8 +3,8 @@ function fig10_correlation_map(cfg)
 %   2 panels: (a) max |correlation|, (b) lag in months.
 
     grid = load_grid(cfg);
-    Depth = load_var(cfg, 'Depth');
-    curl  = load_var(cfg, 'curl');
+    Depth = load_figure_var(cfg, 'Depth');
+    curl  = load_figure_var(cfg, 'curl');
 
     nlon = numel(grid.lon);
     nlat = numel(grid.lat);

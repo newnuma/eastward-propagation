@@ -12,7 +12,7 @@ function result = salt_flux(cfg, grid, mld, depth_mode)
 %       result.raw : salt flux term (lon x lat x time)
 
     sal     = load_var(cfg, fullfile(cfg.paths.base_data, 'sal.mat'), 'sal');
-    evp_pre = load_var(cfg, fullfile(cfg.paths.analysis, 'evp_pre.mat'), 'evp_pre');
+    evp_pre = load_var(cfg, fullfile(cfg.paths.base_data, 'evp_pre.mat'), 'evp_pre');
     pres    = double(grid.pres);
     dims    = [numel(grid.lon), numel(grid.lat), numel(grid.time)];
 
