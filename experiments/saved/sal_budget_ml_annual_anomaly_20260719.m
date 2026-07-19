@@ -37,8 +37,8 @@ end
 read_ncep_evap_precip(cfg);
 
 %% Derive the mixed-layer salinity budget
-% compute_mld(cfg);
-% sal_budget_ml = compute_sal_budget(cfg, "ml");
+compute_mld(cfg);
+sal_budget_ml = compute_sal_budget(cfg, "ml");
 
 %% Save all-year annual-mean anomaly figures
 plot_sal_budget_annual_anomaly_terms( ...
