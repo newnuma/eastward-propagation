@@ -7,38 +7,51 @@ cfg = exp.cfg;
 grid = exp.grid;
 
 %% User settings
+% true: recalculate the budget; false: reuse sal_budget_ml.mat when present.
+recompute_budget = false;
 refresh_latent_heat_flux = false;
 
-plot_options.lon_range = [140 250];
-plot_options.lat_range = [0 60];
+plot_options.lon_range = [140 240];
+plot_options.lat_range = [10 60];
 plot_options.max_columns = 6;
 % Figure size in pixels: [width height]. Use [] for automatic sizing.
 plot_options.figure_size = [1200 800];
 plot_options.auto_clim_quantile = 0.98;
 
 % [] selects automatic limits. Set [minimum maximum] to adjust manually.
-plot_options.color_limits.default.tendency = [];
-plot_options.color_limits.default.surface_forcing = [];
-plot_options.color_limits.default.entrainment = [];
-plot_options.color_limits.default.advection_zonal = [];
-plot_options.color_limits.default.advection_meridional = [];
-plot_options.color_limits.default.advection_total = [];
-plot_options.color_limits.default.rhs_total = [];
-plot_options.color_limits.default.residual = [];
+plot_options.color_limits.default.tendency = [-0.04 0.04];
+plot_options.color_limits.default.surface_forcing = [-0.04 0.04];
+plot_options.color_limits.default.entrainment = [-0.04 0.04];
+plot_options.color_limits.default.advection_zonal = [-0.04 0.04];
+plot_options.color_limits.default.advection_meridional = [-0.04 0.04];
+plot_options.color_limits.default.advection_total = [-0.04 0.04];
+plot_options.color_limits.default.rhs_total = [-0.04 0.04];
+plot_options.color_limits.default.residual = [-0.04 0.04];
 
 % Optional mixed-layer override example:
 % plot_options.color_limits.ml.tendency = [-0.05 0.05];
 
-%% Refresh freshwater forcing inputs
-flux_file = fullfile(cfg.paths.data_root, cfg.paths.base_data, 'flux.mat');
-if refresh_latent_heat_flux || ~isfile(flux_file)
-    read_ncep_flux(cfg);
-end
-read_ncep_evap_precip(cfg);
+%% Derive or load the mixed-layer salinity budget
+budget_relative_path = fullfile( ...
+    cfg.paths.analysis, 'sal_budget_ml.mat');
+budget_file = fullfile(cfg.paths.data_root, budget_relative_path);
+needs_budget_computation = recompute_budget || ...
+    refresh_latent_heat_flux || ~isfile(budget_file);
 
-%% Derive the mixed-layer salinity budget
-compute_mld(cfg);
-sal_budget_ml = compute_sal_budget(cfg, "ml");
+if needs_budget_computation
+    flux_file = fullfile( ...
+        cfg.paths.data_root, cfg.paths.base_data, 'flux.mat');
+    if refresh_latent_heat_flux || ~isfile(flux_file)
+        read_ncep_flux(cfg);
+    end
+    read_ncep_evap_precip(cfg);
+    compute_mld(cfg);
+    sal_budget_ml = compute_sal_budget(cfg, "ml");
+else
+    fprintf('[experiment] Loading saved mixed-layer salinity budget.\n');
+    sal_budget_ml = load_var( ...
+        cfg, budget_relative_path, 'sal_budget_ml');
+end
 
 %% Save all-year annual-mean anomaly figures
 plot_sal_budget_annual_anomaly_terms( ...
@@ -49,6 +62,7 @@ plot_sal_budget_annual_anomaly_terms( ...
 settings.layer = 'ml';
 settings.budget_years = (year(grid.time(1)):year(grid.time(end)))';
 settings.plot_options = plot_options;
+settings.recompute_budget = recompute_budget;
 settings.refresh_latent_heat_flux = refresh_latent_heat_flux;
 exp.cfg = cfg;
 save_experiment(exp, 'settings', settings);

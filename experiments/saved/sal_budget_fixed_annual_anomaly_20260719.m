@@ -8,46 +8,76 @@ grid = exp.grid;
 
 %% User settings
 fixed_depths_dbar = cfg.analysis.budget_depths;  % e.g. [100 150 200]
+% true: recalculate all budgets; false: reuse saved budget files when present.
+recompute_budget = false;
 refresh_latent_heat_flux = false;
 
-plot_options.lon_range = [140 250];
-plot_options.lat_range = [0 60];
+plot_options.lon_range = [140 240];
+plot_options.lat_range = [10 60];
 plot_options.max_columns = 6;
 % Figure size in pixels: [width height]. Use [] for automatic sizing.
 plot_options.figure_size = [1200 800];
 plot_options.auto_clim_quantile = 0.98;
 
 % [] selects automatic limits. Set [minimum maximum] to adjust manually.
-plot_options.color_limits.default.tendency = [];
-plot_options.color_limits.default.surface_forcing = [];
-plot_options.color_limits.default.entrainment = [];
-plot_options.color_limits.default.advection_zonal = [];
-plot_options.color_limits.default.advection_meridional = [];
-plot_options.color_limits.default.advection_total = [];
-plot_options.color_limits.default.rhs_total = [];
-plot_options.color_limits.default.residual = [];
+plot_options.color_limits.default.tendency = [-0.04 0.04];
+plot_options.color_limits.default.surface_forcing = [-0.04 0.04];
+plot_options.color_limits.default.entrainment = [-0.04 0.04];
+plot_options.color_limits.default.advection_zonal = [-0.04 0.04];
+plot_options.color_limits.default.advection_meridional = [-0.04 0.04];
+plot_options.color_limits.default.advection_total = [-0.04 0.04];
+plot_options.color_limits.default.rhs_total = [-0.04 0.04];
+plot_options.color_limits.default.residual = [-0.04 0.04];
 
 % Optional depth-specific override examples:
 % plot_options.color_limits.to_150dbar.tendency = [-0.05 0.05];
 % plot_options.color_limits.to_150dbar.residual = [-0.02 0.02];
 
-%% Refresh freshwater forcing inputs
-flux_file = fullfile(cfg.paths.data_root, cfg.paths.base_data, 'flux.mat');
-if refresh_latent_heat_flux || ~isfile(flux_file)
-    read_ncep_flux(cfg);
-end
-read_ncep_evap_precip(cfg);
-
-%% Derive fixed-depth budgets and save all-year figures
-% compute_sal_budget loads MLD metadata, so refresh it for consistency.
-compute_mld(cfg);
-
+%% Derive or load fixed-depth budgets and save all-year figures
+pres = double(grid.pres(:));
+budget_inputs_ready = false;
 for i = 1:numel(fixed_depths_dbar)
-    budget = compute_sal_budget(cfg, fixed_depths_dbar(i));
-    depth_tag = strrep(sprintf('%.10g', budget.depth_dbar), '.', 'p');
+    requested_depth = fixed_depths_dbar(i);
+    validateattributes(requested_depth, {'numeric'}, ...
+        {'scalar', 'real', 'finite', 'positive'}, ...
+        mfilename, 'fixed_depths_dbar');
+    if requested_depth > max(pres)
+        error('experiment:DepthOutOfRange', ...
+            ['Requested depth %.3g dbar exceeds the deepest grid ' ...
+             'level %.3g dbar.'], requested_depth, max(pres));
+    end
+
+    [~, depth_index] = min(abs(pres - double(requested_depth)));
+    resolved_depth = pres(depth_index);
+    depth_tag = strrep(sprintf('%.10g', resolved_depth), '.', 'p');
     layer_key = sprintf('to_%sdbar', depth_tag);
-    layer_label = sprintf('Surface to %.10g dbar', budget.depth_dbar);
     file_prefix = sprintf('sal_budget_%s', layer_key);
+    budget_name = file_prefix;
+    budget_relative_path = fullfile( ...
+        cfg.paths.analysis, [budget_name '.mat']);
+    budget_file = fullfile(cfg.paths.data_root, budget_relative_path);
+    needs_budget_computation = recompute_budget || ...
+        refresh_latent_heat_flux || ~isfile(budget_file);
+
+    if needs_budget_computation
+        if ~budget_inputs_ready
+            flux_file = fullfile( ...
+                cfg.paths.data_root, cfg.paths.base_data, 'flux.mat');
+            if refresh_latent_heat_flux || ~isfile(flux_file)
+                read_ncep_flux(cfg);
+            end
+            read_ncep_evap_precip(cfg);
+            compute_mld(cfg);
+            budget_inputs_ready = true;
+        end
+        budget = compute_sal_budget(cfg, requested_depth);
+    else
+        fprintf('[experiment] Loading saved salinity budget: %s\n', ...
+            budget_name);
+        budget = load_var(cfg, budget_relative_path, budget_name);
+    end
+
+    layer_label = sprintf('Surface to %.10g dbar', budget.depth_dbar);
 
     plot_sal_budget_annual_anomaly_terms( ...
         budget, grid, layer_key, layer_label, file_prefix, ...
@@ -58,6 +88,7 @@ end
 settings.fixed_depths_dbar = fixed_depths_dbar;
 settings.budget_years = (year(grid.time(1)):year(grid.time(end)))';
 settings.plot_options = plot_options;
+settings.recompute_budget = recompute_budget;
 settings.refresh_latent_heat_flux = refresh_latent_heat_flux;
 exp.cfg = cfg;
 save_experiment(exp, 'settings', settings);
