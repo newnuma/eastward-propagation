@@ -22,6 +22,7 @@ function cfg = create_config(data_root)
     cfg.paths.base_data = 'base_data';
     cfg.paths.analysis  = 'analysis_data';
     cfg.paths.figures   = 'figures';
+    cfg.paths.experiments = 'experiments';
 
     %% --- Target region ---------------------------------------------------
     cfg.target_lon = [119.5, 259.5];   % longitude range [degrees East]
@@ -47,8 +48,7 @@ function cfg = create_config(data_root)
     cfg.ncep.flux.files.sw = 'nswrs.sfc.mon.mean.nc';
     cfg.ncep.wind.files.u = 'uflx.sfc.mon.mean.nc';
     cfg.ncep.wind.files.v = 'vflx.sfc.mon.mean.nc';
-    cfg.ncep.evp_pre.files.prate = 'prate.sfc.mon.mean.nc';
-    cfg.ncep.evp_pre.files.skt   = 'skt.sfc.mon.mean.nc';
+    cfg.ncep.evap_precip.files.prate = 'prate.sfc.mon.mean.nc';
 
     % https://downloads.psl.noaa.gov/Datasets/ncep.reanalysis/Monthlies/surface/
     cfg.ncep.slp.files.slp = 'slp.mon.mean.nc';
@@ -57,6 +57,7 @@ function cfg = create_config(data_root)
     %% --- Physical constants ----------------------------------------------
     cfg.const.rho0     = 1025;          % reference density [kg/m^3]
     cfg.const.cp       = 3986;          % specific heat capacity [J/(kg*K)]
+    cfg.const.lv       = 2.5e6;         % latent heat of vaporization [J/kg]
     cfg.const.omega    = 7.292115e-5;   % Earth angular velocity [rad/s]
     cfg.const.R        = 6371000;       % Earth radius [m]
 
@@ -65,4 +66,5 @@ function cfg = create_config(data_root)
     cfg.analysis.target_isopycnals = [24.5, 25.0, 25.5, 26.0, 26.3, 26.5, 26.7];
     cfg.analysis.max_depth         = 500;       % max depth for MLD search [dbar]
     cfg.analysis.depth_range       = [5, 150]; % depth range for averaging [dbar]
+    cfg.analysis.budget_depths     = 150;       % fixed-layer budget depths [dbar]
 end

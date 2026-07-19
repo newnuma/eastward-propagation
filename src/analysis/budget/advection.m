@@ -1,15 +1,15 @@
 function result = advection(cfg, grid, alldata, mld, depth_mode, cached)
-%ADVECTION Compute horizontal heat advection term.
+%ADVECTION Compute horizontal tracer advection terms.
 %
 %   result = advection(cfg, grid, alldata, mld, depth_mode)
 %   result = advection(cfg, grid, alldata, mld, depth_mode, cached)
 %
-%   -u_H . grad_H(T)  where u_H = u_G + u_E
+%   -u_H . grad_H(C)  where u_H = u_G + u_E
 %
 %   Inputs:
 %       alldata    : 4D data (lon x lat x depth x time)
 %       mld        : mld struct
-%       depth_mode : "ml" for mixed layer, or pressure level index (integer)
+%       depth_mode : "ml" for mixed layer, or target pressure [dbar]
 %       cached     : (optional) struct with pre-loaded .wind, .gvel, .pden
 %
 %   Output:
@@ -47,22 +47,22 @@ function result = advection(cfg, grid, alldata, mld, depth_mode, cached)
     Ue =  wind.tauy ./ depth ./ (rho0 * f_3d);
     Ve = -wind.taux ./ depth ./ (rho0 * f_3d);
 
-    % --- Temperature gradients ---
-    dT_dx = NaN(nlon, nlat, max_k, ntime);
-    dT_dy = NaN(nlon, nlat, max_k, ntime);
+    % --- Tracer gradients ---
+    dC_dx = NaN(nlon, nlat, max_k, ntime);
+    dC_dy = NaN(nlon, nlat, max_k, ntime);
 
     for t = 1:ntime
         for pr = 1:max_k
             for la = 1:nlat
                 dx = cos(lat(la) * deg2rad) * (2 * deg2rad) * R;
                 for lo = 2:nlon-1
-                    dT_dx(lo, la, pr, t) = (alldata(lo+1,la,pr,t) - alldata(lo-1,la,pr,t)) / dx;
+                    dC_dx(lo, la, pr, t) = (alldata(lo+1,la,pr,t) - alldata(lo-1,la,pr,t)) / dx;
                 end
             end
             dy = (2 * deg2rad) * R;
             for la = 2:nlat-1
                 for lo = 2:nlon-1
-                    dT_dy(lo, la, pr, t) = (alldata(lo,la+1,pr,t) - alldata(lo,la-1,pr,t)) / dy;
+                    dC_dy(lo, la, pr, t) = (alldata(lo,la+1,pr,t) - alldata(lo,la-1,pr,t)) / dy;
                 end
             end
         end
@@ -90,21 +90,21 @@ function result = advection(cfg, grid, alldata, mld, depth_mode, cached)
     end
 
     % --- Advection: -u * dT/dx, -v * dT/dy ---
-    Dtx = -dT_dx .* U .* dt_s;
-    Dty = -dT_dy .* V .* dt_s;
+    adv_x = -dC_dx .* U .* dt_s;
+    adv_y = -dC_dy .* V .* dt_s;
 
     % --- Depth average ---
     if use_ml
-        [Dtx_mean, ~] = mld_mean(Dtx, grid, pden, mld, cfg.analysis.mld_threshold);
-        [Dty_mean, ~] = mld_mean(Dty, grid, pden, mld, cfg.analysis.mld_threshold);
+        [adv_x_mean, ~] = mld_mean(adv_x, grid, pden, mld, cfg.analysis.mld_threshold);
+        [adv_y_mean, ~] = mld_mean(adv_y, grid, pden, mld, cfg.analysis.mld_threshold);
     else
-        Dtx_mean = depth_mean(Dtx, pres, 1:max_k);
-        Dty_mean = depth_mean(Dty, pres, 1:max_k);
+        adv_x_mean = depth_mean(adv_x, pres, 1:max_k);
+        adv_y_mean = depth_mean(adv_y, pres, 1:max_k);
     end
 
-    result.x.raw = Dtx_mean;
+    result.x.raw = adv_x_mean;
     result.x = anomaly(result.x, grid);
 
-    result.y.raw = Dty_mean;
+    result.y.raw = adv_y_mean;
     result.y = anomaly(result.y, grid);
 end

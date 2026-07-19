@@ -6,7 +6,7 @@ function result = air_sea_flux(cfg, grid, mld, depth_mode)
 %   Q_net / (rho * cp * h) * dt
 %
 %   Inputs:
-%       depth_mode : "ml" for mixed layer depth, or pressure level index
+%       depth_mode : "ml" for mixed layer depth, or target pressure [dbar]
 %
 %   Output:
 %       result.raw : heat flux term (lon x lat x time)

@@ -1,31 +1,34 @@
 function result = temporal_tendency(data, grid)
-%TEMPORAL_TENDENCY Compute temporal change rate (forward difference).
+%TEMPORAL_TENDENCY Compute a tracer's temporal change (forward difference).
 %
 %   result = temporal_tendency(data, grid)
 %
-%   dT/dt ≈ [ T_avg(t+1) - T_avg(t) ] where T_avg is centered monthly mean
+%   Approximates dC/dt with C_avg(t+1) - C_avg(t), where C_avg is the
+%   centered monthly mean.
 %
 %   Input:
-%       data : 3D array (lon x lat x time) — e.g., mixed-layer mean temperature
+%       data : 3D array (lon x lat x time), e.g. a layer-mean tracer
 %       grid : grid struct
 %
 %   Output:
-%       result.raw  : temporal change rate (lon x lat x time)
+%       result.raw : temporal change (lon x lat x time)
 
     [nlon, nlat, ntime] = size(data);
 
     % Centered monthly average: avg(t) = (data(t-1) + data(t)) / 2
-    m_avg = NaN(nlon, nlat, ntime);
+    monthly_average = NaN(nlon, nlat, ntime);
     for t = 2:ntime
-        m_avg(:,:,t) = (data(:,:,t-1) + data(:,:,t)) / 2;
+        monthly_average(:, :, t) = ...
+            (data(:, :, t - 1) + data(:, :, t)) / 2;
     end
 
     % Forward difference
-    dTdt = NaN(nlon, nlat, ntime);
-    for t = 1:ntime-1
-        dTdt(:,:,t) = m_avg(:,:,t+1) - m_avg(:,:,t);
+    tendency = NaN(nlon, nlat, ntime);
+    for t = 1:ntime - 1
+        tendency(:, :, t) = ...
+            monthly_average(:, :, t + 1) - monthly_average(:, :, t);
     end
 
-    result.raw = dTdt;
+    result.raw = tendency;
     result = anomaly(result, grid);
 end

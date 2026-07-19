@@ -4,13 +4,13 @@ function result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
 %   result = entrain(cfg, grid, alldata, mld, depth_mode)
 %   result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
 %
-%   -(T_mean - T_b) / h * w_e
+%   -(C_mean - C_b) / h * w_e
 %   where w_e = [h(t+1) - h(t)]/dt + w|_{-h}
 %
 %   Inputs:
 %       alldata    : 4D data (lon x lat x depth x time), e.g. temperature
 %       mld        : struct with .depth, .index
-%       depth_mode : "ml" for mixed layer, or pressure level index (integer)
+%       depth_mode : "ml" for mixed layer, or target pressure [dbar]
 %       cached     : (optional) struct with pre-loaded .pden, .wind, .gvel
 %
 %   Output:

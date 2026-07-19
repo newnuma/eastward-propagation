@@ -6,10 +6,9 @@ function cfg = run_analysis(cfg)
 %   Steps:
 %     1. Mixed layer depth (compute_mld)
 %     2. Isopycnal analysis (interpolation to isopycnal surfaces)
-%     3. Mixed-layer heat budget (compute_ml_heat_budget)
-%     4. Mixed-layer salt budget (compute_ml_salt_budget)
-%     5. Fixed-depth salt budget at 150m (compute_fixdepth_salt_budget)
-%     6. Basic field processing (depth means, anomalies)
+%     3. Mixed-layer temperature and salinity budgets
+%     4. Configured fixed-depth temperature and salinity budgets
+%     5. Basic field processing (depth means, anomalies)
 
     fprintf('========================================\n');
     fprintf('  Step 2: Analysis\n');
@@ -20,7 +19,7 @@ function cfg = run_analysis(cfg)
 
     % --- 1. Mixed layer depth ---
     fprintf('\n--- MLD ---\n');
-    mld = compute_mld(cfg);
+    compute_mld(cfg);
 
     % --- 2. Isopycnal analysis ---
     fprintf('\n--- Isopycnal interpolation ---\n');
@@ -35,19 +34,20 @@ function cfg = run_analysis(cfg)
     update_manifest(cfg, 'analysis', 'isopycnal', {'pden', 'temp'});
     fprintf('  Isopycnal results saved\n');
 
-    % --- 3. Mixed-layer heat budget ---
-    fprintf('\n--- Heat budget ---\n');
-    mlhb = compute_ml_heat_budget(cfg);
+    % --- 3. Mixed-layer tracer budgets ---
+    fprintf('\n--- Mixed-layer tracer budgets ---\n');
+    temp_budget_ml = compute_temp_budget(cfg, "ml"); %#ok<NASGU>
+    sal_budget_ml = compute_sal_budget(cfg, "ml"); %#ok<NASGU>
 
-    % --- 4. Mixed-layer salt budget ---
-    fprintf('\n--- Salt budget ---\n');
-    mlsb = compute_ml_salt_budget(cfg);
+    % --- 4. Fixed-depth tracer budgets ---
+    budget_depths = cfg.analysis.budget_depths;
+    for target_depth = budget_depths(:)'
+        fprintf('\n--- Tracer budgets to %.3g dbar ---\n', target_depth);
+        compute_temp_budget(cfg, target_depth);
+        compute_sal_budget(cfg, target_depth);
+    end
 
-    % --- 5. Fixed-depth salt budget (150m) ---
-    fprintf('\n--- Fixed-depth salt budget (150m) ---\n');
-    sb150 = compute_fixdepth_salt_budget(cfg, 150);  % 150 dbar
-
-    % --- 6. Basic field processing ---
+    % --- 5. Basic field processing ---
     fprintf('\n--- Basic field anomalies ---\n');
     compute_basic_fields(cfg, grid, temp, pden);
 

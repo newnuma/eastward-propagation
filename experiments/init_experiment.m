@@ -1,35 +1,26 @@
 function exp = init_experiment(name)
-%INIT_EXPERIMENT Set up experiment output directory and config.
+%INIT_EXPERIMENT Set up a reproducible experiment output directory.
 %
-%   exp = init_experiment('20260412_27sigma')
+%   exp = init_experiment('20260719_sal_budget')
 %
-%   Creates:
-%       experiments/results/{name}/
+%   The output directory is configured by:
+%       fullfile(cfg.paths.data_root, cfg.paths.experiments, name)
 %
 %   Returns:
-%       exp.name    — experiment name
-%       exp.cfg     — config struct (from create_config)
-%       exp.grid    — grid struct
-%       exp.out_dir — absolute path to output directory
-%
-%   Usage in experiment scripts:
-%       exp = init_experiment('20260412_27sigma');
-%       cfg  = exp.cfg;
-%       grid = exp.grid;
-%       ...analysis...
-%       save_fig(fig, 'temp_yanom.png', 'output_dir', exp.out_dir);
-%       save_experiment(exp, 'results', results);
+%       exp.name    experiment name
+%       exp.cfg     configuration struct
+%       exp.grid    target grid
+%       exp.out_dir absolute experiment output directory
 
     exp.name = name;
-    exp.cfg  = create_config();
+    exp.cfg = create_config();
     exp.grid = load_grid(exp.cfg);
+    exp.out_dir = fullfile( ...
+        exp.cfg.paths.data_root, exp.cfg.paths.experiments, name);
 
-    % Output directory
-    project_root = fileparts(fileparts(mfilename('fullpath')));
-    exp.out_dir = fullfile(project_root, 'experiments', 'results', name);
     if ~isfolder(exp.out_dir)
         mkdir(exp.out_dir);
     end
 
-    fprintf('[experiment] %s → %s\n', name, exp.out_dir);
+    fprintf('[experiment] %s -> %s\n', name, exp.out_dir);
 end

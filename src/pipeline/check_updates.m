@@ -8,7 +8,8 @@ function needs_update = check_updates(cfg)
 %   which data sources need updating.
 %
 %   Fields:
-%     .moaa_ts, .moaa_pd, .ncep_flux, .ncep_wind, .ncep_slp, .ncep_evp
+%     .moaa_ts, .moaa_pd, .ncep_flux, .ncep_wind, .ncep_slp,
+%     .ncep_evap_precip
 
     needs_update = struct();
 
@@ -33,9 +34,9 @@ function needs_update = check_updates(cfg)
         cfg.paths.raw.ncep, '*.nc', ...
         fullfile(cfg.paths.base_data, 'slp.mat'));
 
-    needs_update.ncep_evp = source_newer_than_mat(cfg, ...
+    needs_update.ncep_evap_precip = source_newer_than_mat(cfg, ...
         cfg.paths.raw.ncep, '*.nc', ...
-        fullfile(cfg.paths.base_data, 'evp_pre.mat'));
+        fullfile(cfg.paths.base_data, 'evap_precip.mat'));
 
     % Print summary
     fields = fieldnames(needs_update);

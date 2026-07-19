@@ -16,6 +16,13 @@ function mean_data = depth_mean(alldata, pres, pres_range)
 
     [nlon, nlat, ~, ntime] = size(sub);
     nz = numel(pres_range);
+
+    % A one-level layer has no integration interval; use that level value.
+    if nz == 1
+        mean_data = reshape(sub, [nlon, nlat, ntime]);
+        return;
+    end
+
     den = abs(pres_sub(end) - pres_sub(1));
 
     % Reshape and integrate

@@ -10,7 +10,7 @@ function wh_out = vertical_velocity(cfg, grid, mld, depth_mode, cached)
 %       cfg        : configuration struct
 %       grid       : grid struct
 %       mld        : mld struct (.depth, .index)
-%       depth_mode : "ml" for mixed layer, or pressure level index (integer)
+%       depth_mode : "ml" for mixed layer, or target pressure [dbar]
 %       cached     : (optional) struct with pre-loaded .wind, .gvel, .pden
 %
 %   Output:
@@ -32,7 +32,6 @@ function wh_out = vertical_velocity(cfg, grid, mld, depth_mode, cached)
 
     deg2rad = pi / 180;
     rho0  = cfg.const.rho0;
-    omega = cfg.const.omega;
     R     = cfg.const.R;
     dt_s  = reshape(seconds_per_month(grid.time), 1, 1, []);
 

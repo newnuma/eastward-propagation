@@ -8,9 +8,9 @@ function save_experiment(exp, varargin)
 %
 %   Example:
 %       save_experiment(exp, 'iso', iso_results, 'budget', budget);
-%       % → experiments/results/20260412_27sigma/iso.mat
-%       %   experiments/results/20260412_27sigma/budget.mat
-%       %   experiments/results/20260412_27sigma/config.mat
+%       % -> {data_root}/{experiments}/20260412_27sigma/iso.mat
+%       %    {data_root}/{experiments}/20260412_27sigma/budget.mat
+%       %    {data_root}/{experiments}/20260412_27sigma/config.mat
 
     out_dir = exp.out_dir;
     if ~isfolder(out_dir)
@@ -25,7 +25,7 @@ function save_experiment(exp, varargin)
     for i = 1:2:numel(varargin)
         var_name = varargin{i};
         var_value = varargin{i+1};
-        S.(var_name) = var_value; %#ok<STRNU>
+        S.(var_name) = var_value;
         save(fullfile(out_dir, [var_name '.mat']), '-struct', 'S');
         clear S;
         fprintf('[experiment] saved %s.mat\n', var_name);

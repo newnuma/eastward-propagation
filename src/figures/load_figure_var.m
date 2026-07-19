@@ -49,16 +49,6 @@ function val = load_figure_var(cfg, name)
             end
             val = cache.curl;
 
-        case 'mlhb'
-            if ~isfield(cache, 'mlhb')
-                mlhb = load_var(cfg, fullfile(cfg.paths.analysis, 'mlhb.mat'), 'mlhb');
-                if isfield(mlhb, 'flux') && ~isfield(mlhb, 'asf')
-                    mlhb.asf = mlhb.flux;
-                end
-                cache.mlhb = mlhb;
-            end
-            val = cache.mlhb;
-
         case 'slp'
             if ~isfield(cache, 'slp')
                 grid = load_grid(cfg);
@@ -76,7 +66,15 @@ function val = load_figure_var(cfg, name)
             val = cache.flux;
 
         otherwise
-            error('figures:UnknownInput', 'Unknown figure input: %s', name);
+            if startsWith(key, 'temp_budget_') || startsWith(key, 'sal_budget_')
+                if ~isfield(cache, key)
+                    cache.(key) = load_var(cfg, ...
+                        fullfile(cfg.paths.analysis, [key '.mat']), key);
+                end
+                val = cache.(key);
+            else
+                error('figures:UnknownInput', 'Unknown figure input: %s', name);
+            end
     end
 end
 
