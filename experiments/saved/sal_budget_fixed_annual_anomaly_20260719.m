@@ -9,7 +9,7 @@ grid = exp.grid;
 %% User settings
 fixed_depths_dbar = cfg.analysis.budget_depths;  % e.g. [100 150 200]
 % true: recalculate all budgets; false: reuse saved budget files when present.
-recompute_budget = false;
+recompute_budget = true;
 refresh_latent_heat_flux = false;
 
 plot_options.lon_range = [140 240];
