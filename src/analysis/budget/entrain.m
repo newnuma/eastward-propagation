@@ -66,8 +66,9 @@ function result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
                 dh = depth(lo,la,t+1) - depth(lo,la,t) + ...
                      (wh_out.raw(lo,la,t+1) + wh_out.raw(lo,la,t)) / 2;
 
-                % Exclude periods when mixed layer shoals
-                if dh <= 0
+                % Exclude mixed-layer shoaling. For a fixed-depth layer,
+                % retain negative values as detrainment.
+                if use_ml && dh <= 0
                     ent(lo,la,t) = NaN;
                 else
                     ent(lo,la,t) = -(mean_data(lo,la,t) - bottom_data(lo,la,t)) ...
