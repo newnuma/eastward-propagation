@@ -11,6 +11,7 @@ fixed_depths_dbar = cfg.analysis.budget_depths;  % e.g. [100 150 200]
 % true: recalculate all budgets; false: reuse saved budget files when present.
 recompute_budget = true;
 refresh_latent_heat_flux = false;
+refresh_dynamics = false;  % stale code-generated dynamics refresh automatically
 
 plot_options.lon_range = [140 240];
 plot_options.lat_range = [10 60];
@@ -36,6 +37,7 @@ plot_options.color_limits.default.residual = [-0.04 0.04];
 %% Derive or load fixed-depth budgets and save all-year figures
 pres = double(grid.pres(:));
 budget_inputs_ready = false;
+updated_dynamics = prepare_budget_dynamics(cfg, refresh_dynamics);
 for i = 1:numel(fixed_depths_dbar)
     requested_depth = fixed_depths_dbar(i);
     validateattributes(requested_depth, {'numeric'}, ...
@@ -56,8 +58,10 @@ for i = 1:numel(fixed_depths_dbar)
     budget_relative_path = fullfile( ...
         cfg.paths.analysis, [budget_name '.mat']);
     budget_file = fullfile(cfg.paths.data_root, budget_relative_path);
+    stale_budget = budget_output_is_stale(cfg, budget_file, 'sal');
     needs_budget_computation = recompute_budget || ...
-        refresh_latent_heat_flux || ~isfile(budget_file);
+        updated_dynamics.gvel || updated_dynamics.wind || ...
+        refresh_latent_heat_flux || stale_budget;
 
     if needs_budget_computation
         if ~budget_inputs_ready
@@ -90,6 +94,7 @@ settings.budget_years = (year(grid.time(1)):year(grid.time(end)))';
 settings.plot_options = plot_options;
 settings.recompute_budget = recompute_budget;
 settings.refresh_latent_heat_flux = refresh_latent_heat_flux;
+settings.refresh_dynamics = refresh_dynamics;
 exp.cfg = cfg;
 save_experiment(exp, 'settings', settings);
 

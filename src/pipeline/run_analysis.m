@@ -17,6 +17,10 @@ function cfg = run_analysis(cfg)
 
     grid = load_grid(cfg);
 
+    % Refresh code-dependent dynamics without forcing a complete re-ingest
+    % of the much larger MOAA temperature/salinity products.
+    prepare_budget_dynamics(cfg);
+
     % --- 1. Mixed layer depth ---
     fprintf('\n--- MLD ---\n');
     compute_mld(cfg);

@@ -38,7 +38,8 @@ function result = advection(cfg, grid, alldata, mld, depth_mode, cached)
     [depth, max_k, use_ml] = resolve_depth(depth_mode, mld, pres, dims, cfg.analysis.max_depth);
 
     % --- Coriolis ---
-    f_vec = gsw_f(lat(:));  % (nlat x 1)
+    f_vec = masked_coriolis( ...
+        lat, cfg.analysis.min_abs_coriolis_latitude);  % (nlat x 1)
 
     % Expand to 3D for division
     f_3d = repmat(reshape(f_vec, [1 nlat 1]), [nlon 1 ntime]);
@@ -54,13 +55,15 @@ function result = advection(cfg, grid, alldata, mld, depth_mode, cached)
     for t = 1:ntime
         for pr = 1:max_k
             for la = 1:nlat
-                dx = cos(lat(la) * deg2rad) * (2 * deg2rad) * R;
                 for lo = 2:nlon-1
-                    dC_dx(lo, la, pr, t) = (alldata(lo+1,la,pr,t) - alldata(lo-1,la,pr,t)) / dx;
+                    dx = cos(lat(la) * deg2rad) * ...
+                        (lon(lo+1) - lon(lo-1)) * deg2rad * R;
+                    dC_dx(lo, la, pr, t) = ...
+                        (alldata(lo+1,la,pr,t) - alldata(lo-1,la,pr,t)) / dx;
                 end
             end
-            dy = (2 * deg2rad) * R;
             for la = 2:nlat-1
+                dy = (lat(la+1) - lat(la-1)) * deg2rad * R;
                 for lo = 2:nlon-1
                     dC_dy(lo, la, pr, t) = (alldata(lo,la+1,pr,t) - alldata(lo,la-1,pr,t)) / dy;
                 end
@@ -98,13 +101,11 @@ function result = advection(cfg, grid, alldata, mld, depth_mode, cached)
         [adv_x_mean, ~] = mld_mean(adv_x, grid, pden, mld, cfg.analysis.mld_threshold);
         [adv_y_mean, ~] = mld_mean(adv_y, grid, pden, mld, cfg.analysis.mld_threshold);
     else
-        adv_x_mean = depth_mean(adv_x, pres, 1:max_k);
-        adv_y_mean = depth_mean(adv_y, pres, 1:max_k);
+        adv_x_mean = fixed_layer_mean(adv_x, pres, max_k);
+        adv_y_mean = fixed_layer_mean(adv_y, pres, max_k);
     end
 
     result.x.raw = adv_x_mean;
-    result.x = anomaly(result.x, grid);
 
     result.y.raw = adv_y_mean;
-    result.y = anomaly(result.y, grid);
 end

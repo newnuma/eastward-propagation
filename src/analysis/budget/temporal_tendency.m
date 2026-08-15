@@ -1,5 +1,5 @@
 function result = temporal_tendency(data, grid)
-%TEMPORAL_TENDENCY Compute a tracer's temporal change (forward difference).
+%TEMPORAL_TENDENCY Compute a tracer's centered monthly change.
 %
 %   result = temporal_tendency(data, grid)
 %
@@ -13,22 +13,5 @@ function result = temporal_tendency(data, grid)
 %   Output:
 %       result.raw : temporal change (lon x lat x time)
 
-    [nlon, nlat, ntime] = size(data);
-
-    % Centered monthly average: avg(t) = (data(t-1) + data(t)) / 2
-    monthly_average = NaN(nlon, nlat, ntime);
-    for t = 2:ntime
-        monthly_average(:, :, t) = ...
-            (data(:, :, t - 1) + data(:, :, t)) / 2;
-    end
-
-    % Forward difference
-    tendency = NaN(nlon, nlat, ntime);
-    for t = 1:ntime - 1
-        tendency(:, :, t) = ...
-            monthly_average(:, :, t + 1) - monthly_average(:, :, t);
-    end
-
-    result.raw = tendency;
-    result = anomaly(result, grid);
+    result.raw = centered_monthly_change(data, grid.time);
 end

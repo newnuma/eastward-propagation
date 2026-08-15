@@ -4,8 +4,9 @@ function result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
 %   result = entrain(cfg, grid, alldata, mld, depth_mode)
 %   result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
 %
-%   -(C_mean - C_b) / h * w_e
-%   where w_e = [h(t+1) - h(t)]/dt + w|_{-h}
+%   (C_b - C_mean) / h * w_e
+%   where w_e = dh/dt + w|_{-h}. All components are evaluated at the
+%   centered month and expressed as a displacement over that month.
 %
 %   Inputs:
 %       alldata    : 4D data (lon x lat x depth x time), e.g. temperature
@@ -32,52 +33,18 @@ function result = entrain(cfg, grid, alldata, mld, depth_mode, cached)
 
     if use_ml
         [mean_data, bottom_now] = mld_mean(alldata, grid, pden, mld, cfg.analysis.mld_threshold);
-
-        % Bottom value at NEXT month's MLD
-        bottom_next = NaN(nlon, nlat, ntime);
-        for t = 1:ntime-1
-            for la = 1:nlat
-                for lo = 1:nlon
-                    target_d = depth(lo,la,t+1) + (wh_out.raw(lo,la,t) + wh_out.raw(lo,la,t+1)) / 2;
-                    k = 1;
-                    while target_d - pres(k) > 0 && k < numel(pres)
-                        k = k + 1;
-                    end
-                    if k > 1
-                        bottom_next(lo,la,t) = ...
-                            (target_d - pres(k-1)) * ...
-                            (alldata(lo,la,k,t) - alldata(lo,la,k-1,t)) / ...
-                            (pres(k) - pres(k-1)) + alldata(lo,la,k-1,t);
-                    end
-                end
-            end
-        end
-        bottom_data = (bottom_now + bottom_next) / 2;
+        bottom_data = bottom_now;
+        interface_displacement = ...
+            centered_monthly_change(depth, grid.time) + wh_out.raw;
     else
-        mean_data = depth_mean(alldata, pres, 1:max_k);
+        mean_data = fixed_layer_mean(alldata, pres, max_k);
         bottom_data = squeeze(alldata(:, :, max_k, :));
+        interface_displacement = wh_out.raw;
     end
 
-    % Entrainment calculation
-    ent = NaN(nlon, nlat, ntime);
-    for t = 1:ntime-1
-        for la = 1:nlat
-            for lo = 1:nlon
-                dh = depth(lo,la,t+1) - depth(lo,la,t) + ...
-                     (wh_out.raw(lo,la,t+1) + wh_out.raw(lo,la,t)) / 2;
-
-                % Exclude mixed-layer shoaling. For a fixed-depth layer,
-                % retain negative values as detrainment.
-                if use_ml && dh <= 0
-                    ent(lo,la,t) = NaN;
-                else
-                    ent(lo,la,t) = -(mean_data(lo,la,t) - bottom_data(lo,la,t)) ...
-                                   / depth(lo,la,t) * dh;
-                end
-            end
-        end
-    end
-
-    result.raw = ent;
-    result = anomaly(result, grid);
+    % Retain signed boundary motion. Shoaling is a valid geometrical
+    % contribution to the observed variable-depth mean and must not be
+    % converted to missing data.
+    result.raw = (bottom_data - mean_data) ./ depth .* ...
+        interface_displacement;
 end

@@ -34,5 +34,4 @@ function result = salt_flux(cfg, grid, mld, depth_mode)
 
     result.raw = (evap_precip.e_minus_p .* sal_sfc) ./ ...
         (rho0 .* depth) .* dt_s;
-    result = anomaly(result, grid);
 end

@@ -12,61 +12,51 @@ function curl = wsc(lat, lon, taux, tauy)
 %   Output:
 %       curl : wind stress curl (nlon x nlat), permuted to match project convention
 
-    deg2rad = pi / 180;
-    R = 6371000;                        % Earth radius [m] (consistent with cfg.const.R)
-    m_per_deg = R * deg2rad;            % metres per degree
+    lat = double(lat(:));
+    lon = double(lon(:));
     [nlat, nlon] = size(taux);
-    dlat = mean(diff(lat));
-    dy = dlat * m_per_deg;              % meridional grid spacing [m]
-
-    % Zonal distance at each latitude [m]
-    dx = NaN(nlat, nlon);
-    for i = 1:nlat
-        for j = 1:nlon
-            dx(i, j) = lon(j) * m_per_deg * cos(lat(i) * deg2rad);
-        end
+    if ~isequal(size(tauy), [nlat, nlon]) || ...
+            nlat ~= numel(lat) || nlon ~= numel(lon)
+        error('dynamics:GridSizeMismatch', ...
+            'Stress arrays must have size numel(lat) x numel(lon).');
+    end
+    if nlat < 2 || nlon < 2 || any(diff(lat) <= 0) || any(diff(lon) <= 0)
+        error('dynamics:InvalidGrid', ...
+            'Latitude and longitude must be increasing vectors with at least two points.');
     end
 
-    curl_raw = NaN(nlat, nlon);
+    R = 6371000;
+    lat_rad = deg2rad(lat);
+    lon_rad = deg2rad(lon);
 
-    % --- Interior: centered differences ---
-    for i = 2:nlat-1
-        for j = 2:nlon-1
-            curl_raw(i, j) = (tauy(i, j+1) - tauy(i, j-1)) / (2 * (dx(i, j+1) - dx(i, j-1))) ...
-                            - (taux(i+1, j) - taux(i-1, j)) / (2 * dy);
-        end
-    end
+    % Derivatives with respect to spherical coordinates. Interior points
+    % use the full distance between their two neighbours; edge points use
+    % a one-sided difference.
+    d_tauy_dlambda = NaN(nlat, nlon);
+    d_taux_dphi = NaN(nlat, nlon);
 
-    % --- Boundaries: forward / backward differences ---
-    % Top row (i=1), forward in lat
-    for j = 1:nlon-1
-        curl_raw(1, j) = (tauy(1, j+1) - tauy(1, j)) / (dx(1, j+1) - dx(1, j)) ...
-                        - (taux(2, j) - taux(1, j)) / dy;
-    end
-
-    % Left column (j=1), forward in lon
-    for i = 1:nlat-1
-        curl_raw(i, 1) = (tauy(i, 2) - tauy(i, 1)) / (dx(i, 2) - dx(i, 1)) ...
-                        - (taux(i, 2) - taux(i, 1)) / dy;
-    end
-
-    % Top-right corner
-    curl_raw(1, nlon) = curl_raw(1, nlon-1);
-
-    % Right column (j=nlon), backward in lon
-    for i = 2:nlat
-        curl_raw(i, nlon) = (tauy(i, nlon) - tauy(i, nlon-1)) / (dx(i, nlon) - dx(i, nlon-1)) ...
-                           - (taux(i, nlon) - taux(i-1, nlon)) / dy;
-    end
-
-    % Bottom row (i=nlat), backward in lat
+    d_tauy_dlambda(:, 1) = ...
+        (tauy(:, 2) - tauy(:, 1)) ./ (lon_rad(2) - lon_rad(1));
+    d_tauy_dlambda(:, end) = ...
+        (tauy(:, end) - tauy(:, end-1)) ./ (lon_rad(end) - lon_rad(end-1));
     for j = 2:nlon-1
-        curl_raw(nlat, j) = (tauy(nlat, j) - tauy(nlat, j-1)) / (dx(nlat, j) - dx(nlat, j-1)) ...
-                           - (taux(nlat, j) - taux(nlat-1, j)) / dy;
+        d_tauy_dlambda(:, j) = ...
+            (tauy(:, j+1) - tauy(:, j-1)) ./ ...
+            (lon_rad(j+1) - lon_rad(j-1));
     end
 
-    % Bottom-left corner
-    curl_raw(nlat, 1) = curl_raw(nlat, 2);
+    d_taux_dphi(1, :) = ...
+        (taux(2, :) - taux(1, :)) ./ (lat_rad(2) - lat_rad(1));
+    d_taux_dphi(end, :) = ...
+        (taux(end, :) - taux(end-1, :)) ./ (lat_rad(end) - lat_rad(end-1));
+    for i = 2:nlat-1
+        d_taux_dphi(i, :) = ...
+            (taux(i+1, :) - taux(i-1, :)) ./ ...
+            (lat_rad(i+1) - lat_rad(i-1));
+    end
+
+    zonal_scale = R .* cos(lat_rad);
+    curl_raw = d_tauy_dlambda ./ zonal_scale - d_taux_dphi ./ R;
 
     % Permute to (nlon x nlat) project convention
     curl = permute(curl_raw, [2 1]);

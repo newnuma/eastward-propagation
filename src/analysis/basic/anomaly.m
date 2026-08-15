@@ -4,6 +4,7 @@ function data = anomaly(data, grid, opts)
 %   data = anomaly(data, grid)
 %   data = anomaly(data, grid, 'Detrend', true)
 %   data = anomaly(data, grid, 'Sum', true)
+%   data = anomaly(data, grid, 'Sum', true, 'MinAnnualMonths', 10)
 %
 %   Inputs:
 %       data : struct with .raw field [nlon x nlat x ntime]
@@ -27,6 +28,7 @@ function data = anomaly(data, grid, opts)
         grid   struct
         opts.Detrend (1,1) logical = false
         opts.Sum     (1,1) logical = false
+        opts.MinAnnualMonths (1,1) double {mustBeInteger, mustBePositive} = 1
     end
 
     x = data.raw;
@@ -45,16 +47,14 @@ function data = anomaly(data, grid, opts)
 
     % Yearly mean of raw
     x_flat = reshape(permute(x, [3 1 2]), [TI, LO*LA]);
-    tt = array2timetable(x_flat, 'RowTimes', time);
-    ym = retime(tt, 'yearly', 'mean');
-    ym_arr = ym.Variables;
+    ym_arr = aggregate_yearly( ...
+        x_flat, time, 'mean', opts.MinAnnualMonths);
     data.ymean = permute(reshape(ym_arr, [size(ym_arr,1) LO LA]), [2 3 1]);
 
     % Yearly anomaly mean
     anom_flat = reshape(permute(anom, [3 1 2]), [TI, LO*LA]);
-    at = array2timetable(anom_flat, 'RowTimes', time);
-    yam = retime(at, 'yearly', 'mean');
-    yam_arr = yam.Variables;
+    yam_arr = aggregate_yearly( ...
+        anom_flat, time, 'mean', opts.MinAnnualMonths);
     data.yanom = permute(reshape(yam_arr, [size(yam_arr,1) LO LA]), [2 3 1]);
 
     % --- Optional: detrend ---
@@ -62,17 +62,43 @@ function data = anomaly(data, grid, opts)
         dt_flat = detrend(anom_flat, 'omitnan');
         data.dtanom = permute(reshape(dt_flat, [TI LO LA]), [2 3 1]);
 
-        dt_at = array2timetable(dt_flat, 'RowTimes', time);
-        dt_yam = retime(dt_at, 'yearly', 'mean');
-        dt_yam_arr = dt_yam.Variables;
+        dt_yam_arr = aggregate_yearly( ...
+            dt_flat, time, 'mean', opts.MinAnnualMonths);
         data.dtyanom = permute(reshape(dt_yam_arr, [size(dt_yam_arr,1) LO LA]), [2 3 1]);
     end
 
     % --- Optional: yearly sum ---
     if opts.Sum
-        ys = retime(at, 'yearly', 'sum');
-        ys_arr = ys.Variables;
+        ys_arr = aggregate_yearly( ...
+            anom_flat, time, 'sum', opts.MinAnnualMonths);
         data.ysum = permute(reshape(ys_arr, [size(ys_arr,1) LO LA]), [2 3 1]);
+    end
+end
+
+function annual = aggregate_yearly(monthly, time, method, min_months)
+%AGGREGATE_YEARLY Missing-safe annual mean or sum for flattened fields.
+
+    year_number = year(time(:));
+    years = unique(year_number, 'stable');
+    annual = NaN(numel(years), size(monthly, 2));
+
+    for yi = 1:numel(years)
+        values = monthly(year_number == years(yi), :);
+        valid_count = sum(isfinite(values), 1);
+        value_sum = sum(values, 1, 'omitnan');
+
+        switch method
+            case 'mean'
+                aggregated = value_sum ./ valid_count;
+            case 'sum'
+                aggregated = value_sum;
+            otherwise
+                error('analysis:UnknownAnnualAggregation', ...
+                    'Unknown annual aggregation method: %s', method);
+        end
+
+        aggregated(valid_count < min_months) = NaN;
+        annual(yi, :) = aggregated;
     end
 end
 

@@ -30,12 +30,13 @@ function read_ncep_wind(cfg)
     sub_lon = src_lon(lr1:lr2);
     sub_lat = src_lat(ar1:ar2);
 
-    % Read wind stress (negate uflx: NCEP convention → eastward positive)
+    % NCEP UFLX and VFLX are atmospheric momentum fluxes, i.e. the
+    % negative of the stress exerted on the ocean. Negate both components.
     uf_raw = ncread(fullfile(raw_dir, cfg.ncep.wind.files.u), 'uflx');
     vf_raw = ncread(fullfile(raw_dir, cfg.ncep.wind.files.v), 'vflx');
 
-    uf = -uf_raw(lr1:lr2, ar1:ar2, time_idx);   % eastward positive
-    vf =  vf_raw(lr1:lr2, ar1:ar2, time_idx);
+    uf = -uf_raw(lr1:lr2, ar1:ar2, time_idx);   % ocean stress, eastward positive
+    vf = -vf_raw(lr1:lr2, ar1:ar2, time_idx);   % ocean stress, northward positive
 
     % Ensure ascending latitude for curl computation
     if sub_lat(1) > sub_lat(end)

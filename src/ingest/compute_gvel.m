@@ -20,13 +20,12 @@ function compute_gvel(cfg)
     deg2rad = pi / 180;
     R = cfg.const.R;
 
-    % Coriolis parameter at each latitude
-    f = gsw_f(lat(:));   % (nlat x 1)
+    % Coriolis parameter at each latitude. Geostrophic balance is not used
+    % inside the configured equatorial exclusion band.
+    f = masked_coriolis(lat, cfg.analysis.min_abs_coriolis_latitude);
 
     dlon = mean(diff(lon)) * deg2rad;   % grid spacing in radians
     dlat = mean(diff(lat)) * deg2rad;
-    dy   = dlat * R;                    % meridional distance [m]
-
     [nlon, nlat, ndepth, ntime] = size(dheight);
 
     gvel_u = NaN(nlon, nlat, ndepth, ntime, 'single');

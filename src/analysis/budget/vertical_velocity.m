@@ -35,7 +35,8 @@ function wh_out = vertical_velocity(cfg, grid, mld, depth_mode, cached)
     R     = cfg.const.R;
     dt_s  = reshape(seconds_per_month(grid.time), 1, 1, []);
 
-    f_vec = gsw_f(lat(:));
+    f_vec = masked_coriolis( ...
+        lat, cfg.analysis.min_abs_coriolis_latitude);
     beta  = 2 * cfg.const.omega * cos(lat(:) * deg2rad) / R;
 
     f_3d    = repmat(reshape(f_vec, [1 nlat 1]), [nlon 1 ntime]);

@@ -22,5 +22,4 @@ function result = air_sea_flux(cfg, grid, mld, depth_mode)
     dt_s = reshape(seconds_per_month(grid.time), 1, 1, []);
 
     result.raw = -flux.net ./ (depth * rho0 * cp) .* dt_s;
-    result = anomaly(result, grid);
 end

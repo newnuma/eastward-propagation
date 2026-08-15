@@ -10,6 +10,7 @@ grid = exp.grid;
 % true: recalculate the budget; false: reuse temp_budget_ml.mat when present.
 recompute_budget = false;
 refresh_heat_flux = false;
+refresh_dynamics = false;  % stale code-generated dynamics refresh automatically
 
 plot_options.lon_range = [140 240];
 plot_options.lat_range = [10 60];
@@ -37,8 +38,11 @@ plot_options.color_limits.default.residual = [-1 1];
 budget_relative_path = fullfile( ...
     cfg.paths.analysis, 'temp_budget_ml.mat');
 budget_file = fullfile(cfg.paths.data_root, budget_relative_path);
+updated_dynamics = prepare_budget_dynamics(cfg, refresh_dynamics);
+stale_budget = budget_output_is_stale(cfg, budget_file, 'temp');
 needs_budget_computation = recompute_budget || ...
-    refresh_heat_flux || ~isfile(budget_file);
+    updated_dynamics.gvel || updated_dynamics.wind || ...
+    refresh_heat_flux || stale_budget;
 
 if needs_budget_computation
     flux_file = fullfile( ...
@@ -65,6 +69,7 @@ settings.budget_years = (year(grid.time(1)):year(grid.time(end)))';
 settings.plot_options = plot_options;
 settings.recompute_budget = recompute_budget;
 settings.refresh_heat_flux = refresh_heat_flux;
+settings.refresh_dynamics = refresh_dynamics;
 exp.cfg = cfg;
 save_experiment(exp, 'settings', settings);
 

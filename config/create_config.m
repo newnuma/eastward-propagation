@@ -67,4 +67,10 @@ function cfg = create_config(data_root)
     cfg.analysis.max_depth         = 500;       % max depth for MLD search [dbar]
     cfg.analysis.depth_range       = [5, 150]; % depth range for averaging [dbar]
     cfg.analysis.budget_depths     = 150;       % fixed-layer budget depths [dbar]
+    % The geostrophic/Ekman approximations used by the budget are singular
+    % at the equator. Grid cells closer than this latitude are masked.
+    cfg.analysis.min_abs_coriolis_latitude = 3; % [degrees]
+    % Require sufficient monthly coverage before publishing annual budget
+    % statistics. This also excludes the incomplete final year.
+    cfg.analysis.budget_min_annual_months = 10;
 end
